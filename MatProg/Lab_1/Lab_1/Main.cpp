@@ -1,10 +1,9 @@
 #include "pch.h"
-#include "Auxil.h"                            // вспомогательные функции 
+#include "Auxil.h"
 #include <iostream>
 #include <ctime>
 #include <locale>
 #include <tchar.h>
-#include <omp.h>
 
 #define  CYCLE  10                       // количество циклов  
 
@@ -29,6 +28,33 @@ ull fibonachi(ull n)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	setlocale(LC_ALL, "rus");
+
+	for (size_t i = 1; i <= 10; i++)
+	{
+		double  av1 = 0, av2 = 0;
+		clock_t  t1 = 0, t2 = 0;
+
+		auxil::start();                          // старт генерации 
+		t1 = clock();                            // фиксация времени 
+		int cycles = pow(10, i + 2) / 2;
+		for (int i = 0; i < cycles; i++)
+		{
+			av1 += (double)auxil::iget(-100, 100); // сумма случайных чисел 
+			av2 += auxil::dget(-100, 100);         // сумма случайных чисел 
+		}
+		t2 = clock();                            // фиксация времени 
+
+
+		std::cout << std::endl << "количество циклов:         " << cycles;
+		std::cout << std::endl << "среднее значение (int):    " << av1 / cycles;
+		std::cout << std::endl << "среднее значение (double): " << av2 / cycles;
+		std::cout << std::endl << "продолжительность (у.е):   " << (t2 - t1);
+		std::cout << std::endl << "                  (сек):   "
+			<< ((double)(t2 - t1)) / ((double)CLOCKS_PER_SEC);
+		std::cout << std::endl;
+	}
+
 
 	double  av1 = 0, av2 = 0;
 	clock_t  t1 = 0, t2 = 0;
@@ -52,7 +78,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		std::cout << std::endl << "                  (сек):   "
 			<< ((double)(t2 - t1)) / ((double)CLOCKS_PER_SEC);
 	}
-	system("pause");
-
+	std::cout << '\n';
 	return 0;
 }
