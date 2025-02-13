@@ -39,7 +39,16 @@ namespace TextCalculator
 
         private void InitializeComponent()
         {
-            txtInput = new TextBox() { Text = InputTextPlaceholder, Tag = InputTextPlaceholder, Dock = DockStyle.Fill };
+            txtInput = new TextBox()
+            {
+                Text = InputTextPlaceholder,
+                Tag = InputTextPlaceholder,
+                Anchor = AnchorStyles.Left | AnchorStyles.Right,
+                ScrollBars = ScrollBars.Vertical,
+                WordWrap = true,
+                Height = 100,
+                Multiline = true
+            };
             txtInput.Enter += TxtInput_Enter;
             txtInput.Leave += TxtInput_Leave;
 
@@ -51,7 +60,7 @@ namespace TextCalculator
             lblResult = new Label()
             {
                 AutoSize = true,
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
+                Dock = DockStyle.Top
             };
 
             TableLayoutPanel tablePanel = new TableLayoutPanel() { Dock = DockStyle.Top };
@@ -68,10 +77,10 @@ namespace TextCalculator
             this.Controls.Add(tablePanel);
 
             this.Padding = new Padding(20);
-            this.Font = new Font(FontFamily.GenericSansSerif, 14);
+            this.Font = new Font(FontFamily.GenericSansSerif, 12);
             this.Text = "Текстовый калькулятор";
             this.Width = 800;
-            this.Height = 600;
+            this.Height = 400;
         }
 
         #endregion
@@ -103,7 +112,7 @@ namespace TextCalculator
             btnReplace = new Button() { Text = "Заменить подстроку" };
             btnReplace.Click += BtnReplace_Click;
 
-            var flowPanel = new FlowLayoutPanel() { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
+            var flowPanel = new FlowLayoutPanel() { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Margin = new Padding(0) };
             flowPanel.FlowDirection = FlowDirection.LeftToRight;
             flowPanel.WrapContents = true;
 
@@ -186,12 +195,13 @@ namespace TextCalculator
                 Dock = DockStyle.Top,
                 AutoSize = true,
                 AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                ColumnCount = 3
+                ColumnCount = 3,
+                Margin = new Padding(0)
             };
 
             tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 200F));
+            tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
 
             tableLayout.Controls.Add(txtOldSubstring, 0, 0);
             tableLayout.Controls.Add(txtNewSubstring, 1, 0);
