@@ -12,18 +12,23 @@ namespace TextCalculator
 {
     public partial class Form1 : Form
     {
+        private delegate void InputStringChanged(string newText);
 
-        // Делегат для уведомления о выполненной операции
+        event InputStringChanged UserStringChanged;
+        event Action UserChangedFields;
 
+        private bool _userStringValid = false;
+        private bool _oldSubstringValid = false;
+        private bool _newSubstringValid = false;
 
         private Calculator calculator;
 
-        // Элементы управления (создаются через Designer или программно)
         private TextBox txtInput;
         private TextBox txtOldSubstring;
         private TextBox txtNewSubstring;
-        private TextBox txtIndex;
+        private NumericUpDown numIndex;
         private Label lblResult;
+
         private Button btnReplace;
         private Button btnDelete;
         private Button btnGetChar;
@@ -37,138 +42,7 @@ namespace TextCalculator
         {
             InitializeComponent();
             calculator = new Calculator();
-            // Подписка на событие выполнения операции
             calculator.OperationCompleted += Calculator_OperationCompleted;
-        }
-
-        private void Header_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            Form1_SizeChanged(sender, e);
-        }
-
-        // Обработчик события, получающего результаты из Calculator
-        private void Calculator_OperationCompleted(object sender, OperationEventArgs e)
-        {
-            lblResult.Text = e.Result;
-        }
-
-        // Обработчики кликов по кнопкам
-        private void BtnReplace_Click(object sender, EventArgs e)
-        {
-            // Тестовый блок с try-catch для проверки ввода (пример позитивного/негативного тестирования)
-            try
-            {
-                string input = txtInput.Text;
-                string oldSub = txtOldSubstring.Text;
-                string newSub = txtNewSubstring.Text;
-                calculator.ReplaceSubstring(input, oldSub, newSub);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка при замене подстроки: " + ex.Message);
-            }
-        }
-
-        private void BtnDelete_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                string input = txtInput.Text;
-                // Здесь можно использовать, например, значение из txtOldSubstring для удаления
-                calculator.DeleteSubstring(input, txtOldSubstring.Text);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка при удалении подстроки: " + ex.Message);
-            }
-        }
-
-        private void BtnGetChar_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                string input = txtInput.Text;
-                if (!int.TryParse(txtIndex.Text, out int index))
-                {
-                    MessageBox.Show("Введите корректный индекс (целое число).");
-                    return;
-                }
-                calculator.GetCharAtIndex(input, index);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка при получении символа: " + ex.Message);
-            }
-        }
-
-        private void BtnLength_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                string input = txtInput.Text;
-                calculator.GetLength(input);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка при вычислении длины строки: " + ex.Message);
-            }
-        }
-
-        private void BtnCountVowels_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                string input = txtInput.Text;
-                calculator.CountVowels(input);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка при подсчёте гласных: " + ex.Message);
-            }
-        }
-
-        private void BtnCountConsonants_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                string input = txtInput.Text;
-                calculator.CountConsonants(input);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка при подсчёте согласных: " + ex.Message);
-            }
-        }
-
-        private void BtnCountSentences_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                string input = txtInput.Text;
-                calculator.CountSentences(input);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка при подсчёте предложений: " + ex.Message);
-            }
-        }
-
-        private void BtnCountWords_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                string input = txtInput.Text;
-                calculator.CountWords(input);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка при подсчёте слов: " + ex.Message);
-            }
         }
     }
 }
