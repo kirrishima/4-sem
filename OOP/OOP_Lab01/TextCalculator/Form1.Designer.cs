@@ -74,6 +74,8 @@ namespace TextCalculator
             tablePanel.Controls.Add(InitializeButtons(), 0, 2);
             tablePanel.Controls.Add(lblResult, 0, 3);
 
+            tablePanel.MouseDown += (s, e) => { this.ActiveControl = null; };
+
             this.Controls.Add(tablePanel);
 
             this.Padding = new Padding(20);
@@ -81,8 +83,22 @@ namespace TextCalculator
             this.Text = "Текстовый калькулятор";
             this.Width = 800;
             this.Height = 400;
+
+            this.MouseDown += Form1_MouseDown;
+            this.Activated += Form1_Activated;
         }
 
+        private void Form1_Activated(object sender, EventArgs e)
+        {
+            this.ActiveControl = null;
+        }
+
+        private void Form1_MouseDown(object sender, MouseEventArgs e)
+        {
+            // Если клик произошёл вне активного текстового поля,
+            // сбрасываем активный контрол:
+            this.ActiveControl = null;
+        }
         #endregion
 
         #region ui initializers
@@ -121,10 +137,11 @@ namespace TextCalculator
             flowPanel.Controls.Add(btnCountConsonants);
             flowPanel.Controls.Add(btnCountSentences);
             flowPanel.Controls.Add(btnCountWords);
+            flowPanel.Controls.Add(btnReplace);
             flowPanel.Controls.Add(btnDelete);
             flowPanel.Controls.Add(btnGetChar);
-            flowPanel.Controls.Add(btnReplace);
 
+            flowPanel.MouseDown += (s, e) => { this.ActiveControl = null; };
             foreach (var item in flowPanel.Controls)
             {
                 if (item is Button button)
@@ -207,6 +224,7 @@ namespace TextCalculator
             tableLayout.Controls.Add(txtNewSubstring, 1, 0);
             tableLayout.Controls.Add(numIndex, 2, 0);
 
+            tableLayout.MouseDown += (s, e) => { this.ActiveControl = null; };
             return tableLayout;
         }
         #endregion
@@ -294,6 +312,7 @@ namespace TextCalculator
             {
                 MessageBox.Show("Ошибка при замене подстроки: " + ex.Message);
             }
+            this.ActiveControl = null;
         }
 
         private void BtnDelete_Click(object sender, EventArgs e)
@@ -313,6 +332,7 @@ namespace TextCalculator
             {
                 MessageBox.Show("Ошибка при удалении подстроки: " + ex.Message);
             }
+            this.ActiveControl = null;
         }
 
         private void BtnGetChar_Click(object sender, EventArgs e)
@@ -337,6 +357,7 @@ namespace TextCalculator
             {
                 MessageBox.Show("Ошибка при получении символа: " + ex.Message);
             }
+            this.ActiveControl = null;
         }
 
         private void BtnLength_Click(object sender, EventArgs e)
@@ -356,6 +377,7 @@ namespace TextCalculator
             {
                 MessageBox.Show("Ошибка при вычислении длины строки: " + ex.Message);
             }
+            this.ActiveControl = null;
         }
 
         private void BtnCountVowels_Click(object sender, EventArgs e)
@@ -375,6 +397,7 @@ namespace TextCalculator
             {
                 MessageBox.Show("Ошибка при подсчёте гласных: " + ex.Message);
             }
+            this.ActiveControl = null;
         }
 
         private void BtnCountConsonants_Click(object sender, EventArgs e)
@@ -394,6 +417,7 @@ namespace TextCalculator
             {
                 MessageBox.Show("Ошибка при подсчёте согласных: " + ex.Message);
             }
+            this.ActiveControl = null;
         }
 
         private void BtnCountSentences_Click(object sender, EventArgs e)
@@ -413,6 +437,7 @@ namespace TextCalculator
             {
                 MessageBox.Show("Ошибка при подсчёте предложений: " + ex.Message);
             }
+            this.ActiveControl = null;
         }
 
         private void BtnCountWords_Click(object sender, EventArgs e)
@@ -432,6 +457,7 @@ namespace TextCalculator
             {
                 MessageBox.Show("Ошибка при подсчёте слов: " + ex.Message);
             }
+            this.ActiveControl = null;
         }
         #endregion
     }

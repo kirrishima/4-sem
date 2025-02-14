@@ -101,7 +101,7 @@ namespace TextCalculator
                 if (input == null)
                     throw new ArgumentNullException(nameof(input), "Входная строка не может быть null.");
 
-                int count = input.Count(c => "aeiouAEIOU".Contains(c));
+                int count = input.ToLower().Count(c => "aeiouаоуыияеэю".Contains(c));
                 OnOperationCompleted("Количество гласных: " + count);
             }
             catch (Exception ex)
@@ -117,7 +117,7 @@ namespace TextCalculator
                 if (input == null)
                     throw new ArgumentNullException(nameof(input), "Входная строка не может быть null.");
 
-                int count = input.Count(c => char.IsLetter(c) && !"aeiouAEIOU".Contains(c));
+                int count = input.ToLower().Count(c => char.IsLetter(c) && !"aeiouаоуыияеэю".Contains(c));
                 OnOperationCompleted("Количество согласных: " + count);
             }
             catch (Exception ex)
