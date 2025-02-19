@@ -1,28 +1,24 @@
 using Microsoft.AspNetCore.HttpLogging;
 
-internal class Program
+internal class Program // определяет внутренний класс program
 {
-    private static void Main(string[] args)
+    private static void Main(string[] args) // точка входа в приложение
     {
-        var builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder(args); // создает билдер веб-приложения
 
-        builder.Services.AddHttpLogging(logging =>
+        builder.Services.AddHttpLogging(o => // добавляет сервис http-логирования с параметрами
         {
-            logging.LoggingFields = HttpLoggingFields.All;
-            logging.RequestHeaders.Add("sec-ch-ua");
-            logging.ResponseHeaders.Add("MyResponseHeader");
-            logging.MediaTypeOptions.AddText("application/javascript");
-            logging.RequestBodyLogLimit = 4096;
-            logging.ResponseBodyLogLimit = 4096;
-            logging.CombineLogs = true;
+            o.LoggingFields = HttpLoggingFields.RequestMethod | // логирует метод запроса
+                              HttpLoggingFields.RequestPath |    // логирует путь запроса
+                              HttpLoggingFields.ResponseStatusCode; // логирует статус код ответа
         });
+        builder.Logging.AddFilter("Microsoft.AspNetCore.HttpLogging", LogLevel.Information); // устанавливает уровень логирования для http-логирования
+        var app = builder.Build(); // строит веб-приложение
 
-        var app = builder.Build();
+        app.UseHttpLogging(); // включает http-логирование в конвейере запросов
 
-        app.UseHttpLogging();
+        app.MapGet("/", () => "Мое первое ASPA"); // маппинг get-запроса на корневой путь
 
-        app.MapGet("/", () => "Hello World!");
-
-        app.Run();
+        app.Run(); // запускает приложение
     }
 }
