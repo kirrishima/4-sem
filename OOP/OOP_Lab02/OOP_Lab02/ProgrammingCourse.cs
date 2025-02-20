@@ -15,7 +15,7 @@ namespace OOP_Lab02
 
         public CourseComplexity Complexity { get; set; }
 
-        public int LexturesCount { get; set; }
+        public int LecturesCount { get; set; }
 
         public int LabsCount { get; set; }
 

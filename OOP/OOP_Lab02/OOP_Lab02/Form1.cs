@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -14,19 +15,19 @@ namespace OOP_Lab02
     public partial class Form1 : Form
     {
         string jsonPath = "data.json";
+        string lastSavedJsonTxtPath = "last_save_path.txt";
 
         public Form1()
         {
             InitializeComponent();
 
-            var pp = CreateAddTeachersUI();
+            //var pp = CreateAddTeachersUI();
             var fd = CreateCurrentTeachersUI();
-            var p = CreateExpander(fd, "Список Преподавателей");
+            var p = CreateExpander(fd, "Список Преподавателей", teachersIsExpanded, teachersExpanderContentPanel);
 
-            tabControl1.TabPages[0].Controls.Add(pp);
+            //tabControl1.TabPages[0].Controls.Add(pp);
             tabControl1.TabPages[0].Controls.Add(p);
-            tabControl1.TabPages[2].Controls.Add(CreateAddTeacherToCourseUI());
-
+            tabControl1.TabPages[0].Controls.Add(CreateAddTeacherToCourseUI());
 
             tabControl1.TabPages[1].Controls.Add(CreateAddCoursesUI());
 
@@ -35,11 +36,28 @@ namespace OOP_Lab02
             tabPage1.AutoScroll = true;
             tabPage2.AutoScroll = true;
             tabPage3.AutoScroll = true;
+
+            try
+            {
+                if (File.Exists(lastSavedJsonTxtPath))
+                {
+                    var path = File.ReadAllText(lastSavedJsonTxtPath);
+                    jsonPath = File.Exists(path) ? path : jsonPath;
+                }
+            }
+            catch
+            {
+
+            }
+
+            jsonPathtextBox.Text = jsonPath;
+
+            LoadCoursesFromJson(jsonPath);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            SaveToJson(jsonPath);
+            SaveCoursesToJson(jsonPath);
         }
 
         private TableLayoutPanel CreateControlWithLabel(string header, Control control)
@@ -54,7 +72,6 @@ namespace OOP_Lab02
             {
                 Text = header,
                 AutoSize = true,
-                Margin = new Padding(0),
             };
 
             control.Dock = DockStyle.Fill;
@@ -77,6 +94,30 @@ namespace OOP_Lab02
             using (var dlg = new ErrorDialog(ex))
             {
                 dlg.ShowDialog(this);
+            }
+        }
+
+        private void saveToJsonButon_Click(object sender, EventArgs e)
+        {
+            SaveCoursesToJson(this.jsonPath);
+        }
+
+        private void loadFromJsonButton_Click(object sender, EventArgs e)
+        {
+            LoadCoursesFromJson(this.jsonPath);
+        }
+
+        private void jsonPathtextBox_TextChanged(object sender, EventArgs e)
+        {
+            jsonPath = jsonPathtextBox.Text;
+
+            try
+            {
+                File.WriteAllText(lastSavedJsonTxtPath, jsonPath);
+            }
+            catch (Exception ex)
+            {
+                ShowErrorDialog(ex);
             }
         }
     }

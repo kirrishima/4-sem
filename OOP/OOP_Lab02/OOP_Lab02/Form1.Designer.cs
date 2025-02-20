@@ -1,27 +1,18 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
-using System.Windows.Forms;
-using System.Drawing;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.Json;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Drawing;
+using System.IO;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace OOP_Lab02
 {
     partial class Form1
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -31,17 +22,68 @@ namespace OOP_Lab02
             base.Dispose(disposing);
         }
 
+        private void LoadCoursesFromJson(string path)
+        {
+            if (File.Exists(path))
+            {
+                try
+                {
+                    var jsonString = File.ReadAllText(path);
+                    var json = JsonSerializer.Deserialize<ObservableCollection<ProgrammingCourse>>(jsonString);
+
+                    foreach (var item in json)
+                    {
+                        newCourses.Add(item);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ShowErrorDialog($"Ошибка при загрузке данных из '{path}': {ex.Message}");
+                }
+            }
+        }
+
+        private void SaveCoursesToJson(string path)
+        {
+            try
+            {
+                string jsonString = JsonSerializer.Serialize(newCourses);
+
+                using (var sw = new StreamWriter(path))
+                {
+                    sw.Write(jsonString);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowErrorDialog($"Ошибка при сохранение данных в '{path}': {ex.Message}");
+            }
+        }
+
         #region курсы
 
         TextBox newCourseNameTextBox = new TextBox();
-        NumericUpDown newCourseAudienceAgeUpDown = new NumericUpDown();
-        ComboBox newCourseComplexityComboBox = new ComboBox();
+        TrackBar newCourseAudienceAgeSlider = new TrackBar();
+        ComboBox newCourseComplexityComboBox = new ComboBox() { Margin = new Padding(0, 0, 0, 10) };
         NumericUpDown newCourseLecturesCountUpDown = new NumericUpDown();
         NumericUpDown newCourseLabsCountUpDown = new NumericUpDown();
-        ComboBox newCourseControlTypeComboBox = new ComboBox();
+        ComboBox newCourseControlTypeComboBox = new ComboBox() { Margin = new Padding(0, 0, 0, 10) };
         Button addNewCourseButton = new Button() { Text = "Добавить курс", AutoSize = true };
 
         ObservableCollection<ProgrammingCourse> newCourses = new ObservableCollection<ProgrammingCourse>();
+
+        private Control CreateCurrentCoursesUI()
+        {
+            TableLayoutPanel tableLayoutPanel = new TableLayoutPanel()
+            {
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                Margin = new Padding(0)
+            };
+
+            return tableLayoutPanel;
+        }
 
         private Control CreateAddCoursesUI()
         {
@@ -61,34 +103,50 @@ namespace OOP_Lab02
                 Dock = DockStyle.Fill
             };
 
+            tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+
             tableLayoutPanel.Controls.Add(titleLabel, 0, 0);
             tableLayoutPanel.Controls.Add(CreateControlWithLabel("Название:", newCourseNameTextBox), 0, 1);
 
-            // Настройка NumericUpDown для возраста аудитории
-            newCourseAudienceAgeUpDown.Minimum = 1;
-            newCourseAudienceAgeUpDown.Maximum = 100;
-            newCourseAudienceAgeUpDown.Value = 18;
-            tableLayoutPanel.Controls.Add(CreateControlWithLabel("Возраст аудитории:", newCourseAudienceAgeUpDown), 0, 2);
+            newCourseAudienceAgeSlider.Minimum = 1;
+            newCourseAudienceAgeSlider.Maximum = 100;
+            newCourseAudienceAgeSlider.TickFrequency = 1;
+            newCourseAudienceAgeSlider.Value = 1;
+            newCourseAudienceAgeSlider.Dock = DockStyle.Fill;
 
-            // Настройка ComboBox для сложности курса
+            Label labelCurrentValue = new Label();
+            labelCurrentValue.Location = new Point(newCourseAudienceAgeSlider.Right + 10, newCourseAudienceAgeSlider.Top);
+            labelCurrentValue.Text = newCourseAudienceAgeSlider.Value.ToString();
+
+            newCourseAudienceAgeSlider.ValueChanged += (object sender, EventArgs e) =>
+            {
+                labelCurrentValue.Text = newCourseAudienceAgeSlider.Value.ToString();
+            };
+
+            TableLayoutPanel panel = new TableLayoutPanel
+            {
+                AutoSize = true,
+                Dock = DockStyle.Fill,
+            };
+
+            panel.Controls.Add(labelCurrentValue);
+            panel.Controls.Add(newCourseAudienceAgeSlider);
+
+            tableLayoutPanel.Controls.Add(CreateControlWithLabel("Возраст аудитории:", panel), 0, 2);
+
             newCourseComplexityComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             newCourseComplexityComboBox.Items.AddRange(Enum.GetNames(typeof(CourseComplexity)));
             newCourseComplexityComboBox.SelectedIndex = 0;
             tableLayoutPanel.Controls.Add(CreateControlWithLabel("Сложность курса:", newCourseComplexityComboBox), 0, 3);
 
-            // Настройка NumericUpDown для количества лекций
             newCourseLecturesCountUpDown.Minimum = 1;
             newCourseLecturesCountUpDown.Maximum = 100;
-            newCourseLecturesCountUpDown.Value = 10;
             tableLayoutPanel.Controls.Add(CreateControlWithLabel("Количество лекций:", newCourseLecturesCountUpDown), 0, 4);
 
-            // Настройка NumericUpDown для количества лабораторных
             newCourseLabsCountUpDown.Minimum = 0;
             newCourseLabsCountUpDown.Maximum = 100;
-            newCourseLabsCountUpDown.Value = 5;
             tableLayoutPanel.Controls.Add(CreateControlWithLabel("Количество лабораторных:", newCourseLabsCountUpDown), 0, 5);
 
-            // Настройка ComboBox для вида контроля
             newCourseControlTypeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             newCourseControlTypeComboBox.Items.AddRange(Enum.GetNames(typeof(FinalsType)));
             newCourseControlTypeComboBox.SelectedIndex = 0;
@@ -96,27 +154,73 @@ namespace OOP_Lab02
 
             tableLayoutPanel.Controls.Add(addNewCourseButton, 0, 7);
 
+
+            tableLayoutPanel.Controls.Add(CreateExpander(CreateCurrentCoursesUI(), "Список Курсов", coursesIsExpanded, coursesExpanderContentPanel), 0, 8);
+
             addNewCourseButton.Click += AddNewCourseButton_Click;
-            // Можно добавить фильтрацию ввода для названия курса (если необходимо)
             newCourseNameTextBox.KeyPress += NewCourseNameTextBox_KeyPress;
 
             return tableLayoutPanel;
         }
 
-        // Пример обработчика для ограничения ввода символов в названии курса
         private void NewCourseNameTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Разрешаем буквы, цифры, пробелы, дефис и точку, а также клавишу Backspace
             if (!char.IsLetterOrDigit(e.KeyChar) && e.KeyChar != ' ' && e.KeyChar != '-' && e.KeyChar != '.' && e.KeyChar != (char)Keys.Back)
             {
                 e.Handled = true;
             }
         }
 
+        private GroupBox CreateCourseCard(ProgrammingCourse course)
+        {
+            TableLayoutPanel tableLayoutPanel = new TableLayoutPanel()
+            {
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                Margin = new Padding(0)
+            };
+
+            var deleteButton = new Button() { AutoSize = true, Text = "Удалить" };
+
+            tableLayoutPanel.Controls.Add(CreateControlWithLabel("Название курса:", new Label() { Text = course.Name }), 0, 0);
+            tableLayoutPanel.Controls.Add(CreateControlWithLabel("Возраст аудитории:", new Label() { Text = course.AudienceAge.ToString() }), 0, 1);
+            tableLayoutPanel.Controls.Add(CreateControlWithLabel("Сложность:", new Label() { Text = course.Complexity.ToString() }), 0, 2);
+            tableLayoutPanel.Controls.Add(CreateControlWithLabel("Количество лекций:", new Label() { Text = course.LecturesCount.ToString() }), 0, 3);
+            tableLayoutPanel.Controls.Add(CreateControlWithLabel("Количество лабораторных:", new Label() { Text = course.LabsCount.ToString() }), 0, 4);
+            tableLayoutPanel.Controls.Add(CreateControlWithLabel("Тип итогового контроля:", new Label() { Text = course.ControlType.ToString() }), 0, 5);
+            tableLayoutPanel.Controls.Add(new Label() { Text = "Преподаватели доступны на вкладке 'Преподаватели'", AutoSize = true }, 0, 6);
+            tableLayoutPanel.Controls.Add(deleteButton, 0, 7);
+
+            var groupBox = new GroupBox()
+            {
+                Name = Guid.NewGuid().ToString(),
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                Margin = new Padding(0),
+                Text = "Информация о курсе"
+            };
+
+            groupBox.Controls.Add(tableLayoutPanel);
+
+            deleteButton.Click += (sender, e) =>
+            {
+                if (newCourses.Contains(course))
+                {
+                    newCourses.Remove(course);
+                }
+                if (coursesExpanderContentPanel.Controls.Contains(groupBox))
+                {
+                    coursesExpanderContentPanel.Controls.Remove(groupBox);
+                }
+            };
+
+            return groupBox;
+        }
+
         private void AddNewCourseButton_Click(object sender, EventArgs e)
         {
-            // Валидация поля "Название" с использованием регулярного выражения:
-            // Допустим, название курса может состоять из букв, цифр, пробелов, дефисов и точек.
             if (string.IsNullOrWhiteSpace(newCourseNameTextBox.Text))
             {
                 ShowErrorDialog("Поле 'Название' не может быть пустым.");
@@ -129,36 +233,30 @@ namespace OOP_Lab02
                 return;
             }
 
-            // Проверка возраста аудитории (> 0)
-            if (newCourseAudienceAgeUpDown.Value <= 0)
+            if (newCourseAudienceAgeSlider.Value <= 0)
             {
                 ShowErrorDialog("Возраст аудитории должен быть больше 0.");
                 return;
             }
 
-            // Проверка количества лекций (> 0)
             if (newCourseLecturesCountUpDown.Value <= 0)
             {
                 ShowErrorDialog("Количество лекций должно быть больше 0.");
                 return;
             }
-            // Количество лабораторных может быть 0 и больше, поэтому дополнительная проверка не требуется
-
-            // Создание нового курса
             var newCourse = new ProgrammingCourse()
             {
                 Name = newCourseNameTextBox.Text,
-                AudienceAge = (int)newCourseAudienceAgeUpDown.Value,
+                AudienceAge = (int)newCourseAudienceAgeSlider.Value,
                 Complexity = (CourseComplexity)Enum.Parse(typeof(CourseComplexity), newCourseComplexityComboBox.SelectedItem.ToString()),
-                LexturesCount = (int)newCourseLecturesCountUpDown.Value,
+                LecturesCount = (int)newCourseLecturesCountUpDown.Value,
                 LabsCount = (int)newCourseLabsCountUpDown.Value,
                 ControlType = (FinalsType)Enum.Parse(typeof(FinalsType), newCourseControlTypeComboBox.SelectedItem.ToString()),
                 Teachers = new ObservableCollection<Teacher>()
             };
 
-            // Очистка полей после добавления
             newCourseNameTextBox.Text = string.Empty;
-            newCourseAudienceAgeUpDown.Value = newCourseAudienceAgeUpDown.Minimum;
+            newCourseAudienceAgeSlider.Value = newCourseAudienceAgeSlider.Minimum;
             newCourseComplexityComboBox.SelectedIndex = 0;
             newCourseLecturesCountUpDown.Value = newCourseLecturesCountUpDown.Minimum;
             newCourseLabsCountUpDown.Value = newCourseLabsCountUpDown.Minimum;
@@ -169,13 +267,13 @@ namespace OOP_Lab02
 
         #endregion
 
-        #region djsakdjsakjdhkas
-        // Элементы для добавления преподавателя в курс:
+        #region добавление преподов в курс
+
         TextBox courseTeacherNameTextBox = new TextBox();
         TextBox courseTeacherDepartmentTextBox = new TextBox();
         MaskedTextBox courseTeacherAuditoriumTextBox = new MaskedTextBox();
         Button addTeacherToCourseButton = new Button() { Text = "Добавить преподавателя в курс", AutoSize = true };
-        ComboBox selectCourseComboBox = new ComboBox();
+        ComboBox selectCourseComboBox = new ComboBox() { Margin = new Padding(0, 0, 0, 10) };
 
         BindingSource coursesBindingSource;
 
@@ -189,7 +287,6 @@ namespace OOP_Lab02
                 Margin = new Padding(0)
             };
 
-            // Заголовок
             var titleLabel = new Label()
             {
                 Text = "Добавление преподавателя в курс",
@@ -198,34 +295,27 @@ namespace OOP_Lab02
                 Dock = DockStyle.Fill
             };
 
+            tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+
             tableLayoutPanel.Controls.Add(titleLabel, 0, 0);
-            // Контрол для выбора курса
             tableLayoutPanel.Controls.Add(CreateControlWithLabel("Выберите курс:", selectCourseComboBox), 0, 1);
-            // Поля для данных преподавателя
             tableLayoutPanel.Controls.Add(CreateControlWithLabel("ФИО преподавателя:", courseTeacherNameTextBox), 0, 2);
             tableLayoutPanel.Controls.Add(CreateControlWithLabel("Кафедра преподавателя:", courseTeacherDepartmentTextBox), 0, 3);
             tableLayoutPanel.Controls.Add(CreateControlWithLabel("Аудитория:", courseTeacherAuditoriumTextBox), 0, 4);
             tableLayoutPanel.Controls.Add(addTeacherToCourseButton, 0, 5);
 
-            // Настройка комбобокса для выбора курса:
             selectCourseComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            // Привязываем список курсов; DisplayMember указывает, что показывать в списке – имя курса
-            // Объявляем BindingSource на уровне класса:
-            BindingSource coursesBindingSource = new BindingSource();
 
-            // При инициализации UI:
             selectCourseComboBox.DataSource = newCourses;
             newCourses.CollectionChanged += NewCourses_CollectionChanged;
-            // Настройка MaskedTextBox для аудитории
+
             courseTeacherAuditoriumTextBox.Mask = "000-L";
 
             selectCourseComboBox.SelectedValueChanged += SelectCourseComboBox_SelectedValueChanged;
 
-            // Добавляем фильтрацию ввода для ФИО и кафедры
             courseTeacherNameTextBox.KeyPress += CourseTeacherNameTextBox_KeyPress;
             courseTeacherDepartmentTextBox.KeyPress += CourseTeacherDepartmentTextBox_KeyPress;
 
-            // Назначаем обработчик нажатия на кнопку
             addTeacherToCourseButton.Click += AddTeacherToCourseButton_Click;
 
             return tableLayoutPanel;
@@ -233,11 +323,16 @@ namespace OOP_Lab02
 
         private void SelectCourseComboBox_SelectedValueChanged(object sender, EventArgs e)
         {
-            expanderContentPanel.Controls.Clear();
+            var ss = selectCourseComboBox.SelectedItem as ProgrammingCourse;
 
-            foreach (var item in ((ProgrammingCourse)selectCourseComboBox.SelectedItem).Teachers)
+            teachersExpanderContentPanel.Controls.Clear();
+
+            if (ss != null && ss.Teachers != null)
             {
-                expanderContentPanel.Controls.Add(CreateTeacherCard(item));
+                foreach (var item in ss.Teachers)
+                {
+                    teachersExpanderContentPanel.Controls.Add(CreateTeacherCard(item));
+                }
             }
         }
 
@@ -246,11 +341,24 @@ namespace OOP_Lab02
             selectCourseComboBox.DataSource = null;
             selectCourseComboBox.DataSource = newCourses;
             selectCourseComboBox.DisplayMember = "Name";
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                var newItem = e.NewItems[0] as ProgrammingCourse;
+                if (newItem != null)
+                {
+                    newItem.Teachers.CollectionChanged += NewTeachers_CollectionChanged;
+                }
+
+                var t = e.NewItems[0] as ProgrammingCourse;
+                if (t != null)
+                {
+                    coursesExpanderContentPanel.Controls.Add(CreateCourseCard(t));
+                }
+            }
         }
 
         private void CourseTeacherNameTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Разрешаем буквы, пробелы, дефис и Backspace
             if (!char.IsLetter(e.KeyChar) && e.KeyChar != ' ' && e.KeyChar != '-' && e.KeyChar != (char)Keys.Back)
             {
                 e.Handled = true;
@@ -259,7 +367,6 @@ namespace OOP_Lab02
 
         private void CourseTeacherDepartmentTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Разрешаем буквы, пробелы и некоторые знаки (как в предыдущей реализации)
             if (!char.IsLetter(e.KeyChar) && e.KeyChar != ' ' && e.KeyChar != '(' &&
                 e.KeyChar != ')' && e.KeyChar != '.' && e.KeyChar != ',' && e.KeyChar != (char)Keys.Back)
             {
@@ -269,20 +376,17 @@ namespace OOP_Lab02
 
         private void AddTeacherToCourseButton_Click(object sender, EventArgs e)
         {
-            // Проверяем, выбран ли курс
             if (selectCourseComboBox.SelectedItem == null)
             {
                 ShowErrorDialog("Выберите курс, в который будет добавлен преподаватель.");
                 return;
             }
 
-            // Валидация ФИО преподавателя с использованием регулярного выражения:
             if (string.IsNullOrWhiteSpace(courseTeacherNameTextBox.Text))
             {
                 ShowErrorDialog("Поле 'ФИО преподавателя' не может быть пустым.");
                 return;
             }
-            // Пример регулярного выражения: минимум два слова, состоящих из букв (кириллица или латиница)
             string teacherNamePattern = @"^[A-Za-zА-Яа-яЁё]+([ -][A-Za-zА-Яа-яЁё]+)+$";
             if (!Regex.IsMatch(courseTeacherNameTextBox.Text, teacherNamePattern))
             {
@@ -290,24 +394,20 @@ namespace OOP_Lab02
                 return;
             }
 
-            // Валидация кафедры преподавателя
             if (string.IsNullOrWhiteSpace(courseTeacherDepartmentTextBox.Text))
             {
                 ShowErrorDialog("Поле 'Кафедра преподавателя' не может быть пустым.");
                 return;
             }
 
-            // Проверка заполненности поля аудитории
             if (!courseTeacherAuditoriumTextBox.MaskCompleted)
             {
                 ShowErrorDialog("Поле 'Аудитория' заполнено некорректно. Формат должен быть: 000-L.");
                 return;
             }
 
-            // Получаем выбранный курс
-            ProgrammingCourse selectedCourse = (ProgrammingCourse)selectCourseComboBox.SelectedItem;
+            ProgrammingCourse selectedCourse = selectCourseComboBox.SelectedItem as ProgrammingCourse;
 
-            // Создаём нового преподавателя
             Teacher newTeacher = new Teacher()
             {
                 FullName = courseTeacherNameTextBox.Text,
@@ -315,150 +415,16 @@ namespace OOP_Lab02
                 Auditorium = courseTeacherAuditoriumTextBox.Text
             };
 
-            // Добавляем преподавателя в коллекцию выбранного курса
-            selectedCourse.Teachers.Add(newTeacher);
+            selectedCourse?.Teachers.Add(newTeacher);
 
-            // Очищаем поля ввода преподавателя
             courseTeacherNameTextBox.Text = string.Empty;
             courseTeacherDepartmentTextBox.Text = string.Empty;
             courseTeacherAuditoriumTextBox.Text = string.Empty;
         }
 
-
         #endregion
 
-
-        TextBox newTeacherNameTextBox = new TextBox();
-        TextBox newTeacherDepartmentTextBox = new TextBox();
-        MaskedTextBox newTeacherAuditoriumTextBox = new MaskedTextBox();
-        Button addNewTeacherButton = new Button() { Text = "Добавить", AutoSize = true };
-
-        private Panel expanderPanel = new Panel();
-        private Button expanderToggleButton = new Button();
-        private Panel expanderContentPanel = new Panel();
-        private bool isExpanded = false;
-
         ObservableCollection<Teacher> newTeachers = new ObservableCollection<Teacher>();
-
-        private void LoadFromJson(string path)
-        {
-            if (File.Exists(path))
-            {
-                try
-                {
-                    var jsonString = File.ReadAllText(path);
-                    var json = JsonSerializer.Deserialize<ObservableCollection<Teacher>>(jsonString);
-
-                    foreach (var item in json)
-                    {
-                        newTeachers.Add(item);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ShowErrorDialog($"Ошибка при загрузке данных из '{path}': {ex.Message}");
-                }
-            }
-        }
-
-        private void SaveToJson(string path)
-        {
-            try
-            {
-                string jsonString = JsonSerializer.Serialize(newTeachers);
-
-                using (var sw = new StreamWriter(path))
-                {
-                    sw.Write(jsonString);
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowErrorDialog($"Ошибка при сохранение данных в '{path}': {ex.Message}");
-            }
-        }
-
-        private Control CreateAddTeachersUI()
-        {
-            TableLayoutPanel tableLayoutPanel = new TableLayoutPanel()
-            {
-                Dock = DockStyle.Top,
-                AutoSize = true,
-                AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                Margin = new Padding(0)
-            };
-
-            var label = new Label()
-            {
-                Text = "Добавление преподавателей",
-                AutoSize = true,
-                TextAlign = System.Drawing.ContentAlignment.TopCenter,
-                Dock = DockStyle.Fill
-            };
-
-            tableLayoutPanel.Controls.Add(label, 0, 0);
-            tableLayoutPanel.Controls.Add(CreateControlWithLabel("ФИО:", newTeacherNameTextBox), 0, 1);
-            tableLayoutPanel.Controls.Add(CreateControlWithLabel("Кафедра:", newTeacherDepartmentTextBox), 0, 2);
-            tableLayoutPanel.Controls.Add(CreateControlWithLabel("Аудитория:", newTeacherAuditoriumTextBox), 0, 3);
-            tableLayoutPanel.Controls.Add(addNewTeacherButton);
-
-            addNewTeacherButton.Click += AddNewTeacherButton_Click;
-            newTeacherNameTextBox.KeyPress += NewTeacherNameTextBox_KeyPress;
-            newTeacherDepartmentTextBox.KeyPress += NewTeacherDepartmentTextBox_KeyPress;
-            newTeacherAuditoriumTextBox.Mask = "000-L";
-            return tableLayoutPanel;
-        }
-
-        private void NewTeacherDepartmentTextBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!char.IsLetter(e.KeyChar) && e.KeyChar != ' ' && e.KeyChar != '(' &&
-             e.KeyChar != ')' && e.KeyChar != '.' && e.KeyChar != ',' && e.KeyChar != (char)Keys.Back)
-            {
-                e.Handled = true;
-            }
-        }
-
-        private void NewTeacherNameTextBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!char.IsLetter(e.KeyChar) && e.KeyChar != ' ' && e.KeyChar != '-' && e.KeyChar != (char)Keys.Back)
-            {
-                e.Handled = true;
-            }
-        }
-
-        private void AddNewTeacherButton_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(newTeacherNameTextBox.Text))
-            {
-                ShowErrorDialog("Поле 'ФИО' не может быть пустым.");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(newTeacherDepartmentTextBox.Text))
-            {
-                ShowErrorDialog("Поле 'Кафедра' не может быть пустым.");
-                return;
-            }
-
-            if (!newTeacherAuditoriumTextBox.MaskCompleted)
-            {
-                ShowErrorDialog("Поле 'Аудитория' заполнено некорректно. Формат должен быть: 000-L.");
-                return;
-            }
-
-            var newTeacher = new Teacher()
-            {
-                FullName = newTeacherNameTextBox.Text,
-                Department = newTeacherDepartmentTextBox.Text,
-                Auditorium = newTeacherAuditoriumTextBox.Text
-            };
-
-            newTeacherNameTextBox.Text = string.Empty;
-            newTeacherDepartmentTextBox.Text = string.Empty;
-            newTeacherAuditoriumTextBox.Text = string.Empty;
-
-            newTeachers.Add(newTeacher);
-        }
 
         private Control CreateCurrentTeachersUI()
         {
@@ -471,7 +437,7 @@ namespace OOP_Lab02
             };
 
             newTeachers.CollectionChanged += NewTeachers_CollectionChanged;
-            LoadFromJson(jsonPath);
+
             return tableLayoutPanel;
         }
 
@@ -505,13 +471,13 @@ namespace OOP_Lab02
 
             button.Click += (object sender, EventArgs e) =>
             {
-                if (newTeachers.Contains(teacher))
+                if ((selectCourseComboBox.SelectedItem as ProgrammingCourse)?.Teachers.Contains(teacher) == true)
                 {
-                    newTeachers.Remove(teacher);
+                    (selectCourseComboBox.SelectedItem as ProgrammingCourse)?.Teachers.Remove(teacher);
                 }
-                if (expanderContentPanel.Controls.Contains(gb))
+                if (teachersExpanderContentPanel.Controls.Contains(gb))
                 {
-                    expanderContentPanel.Controls.Remove(gb);
+                    teachersExpanderContentPanel.Controls.Remove(gb);
                 }
             };
 
@@ -525,18 +491,47 @@ namespace OOP_Lab02
                 var t = e.NewItems[0] as Teacher;
                 if (t != null)
                 {
-                    expanderContentPanel.Controls.Add(CreateTeacherCard(t));
+                    teachersExpanderContentPanel.Controls.Add(CreateTeacherCard(t));
                 }
             }
         }
 
         #region Expander
-        private Panel CreateExpander(Control contentControl, string label)
+
+        private Panel teachersExpanderContentPanel = new Panel();
+        private bool teachersIsExpanded = false;
+
+        private Panel coursesExpanderContentPanel = new Panel();
+        private bool coursesIsExpanded = false;
+
+        private Panel CreateExpander(Control contentControl, string label, bool isExpanded, Panel expanderContentPanel)
         {
-            expanderToggleButton.Text = $"Развернуть {label}";
-            expanderToggleButton.Dock = DockStyle.Top;
-            expanderToggleButton.AutoSize = true;
-            expanderToggleButton.Click += ToggleButton_Click;
+            Panel expanderPanel = new Panel();
+
+            Button expanderToggleButton = new Button()
+            {
+                Text = $"Развернуть {label}",
+                Dock = DockStyle.Top,
+                AutoSize = true,
+            };
+
+            expanderToggleButton.Click += (object sender, EventArgs e) =>
+            {
+                if (isExpanded)
+                {
+                    expanderContentPanel.Visible = false;
+                    expanderPanel.Height = expanderToggleButton.PreferredSize.Height + 2;
+                    expanderToggleButton.Text = $"Развернуть {label}";
+                    isExpanded = false;
+                }
+                else
+                {
+                    expanderContentPanel.Visible = true;
+                    expanderPanel.Height = expanderToggleButton.Height + expanderContentPanel.PreferredSize.Height;
+                    expanderToggleButton.Text = $"Свернуть {label}";
+                    isExpanded = true;
+                }
+            };
 
             expanderContentPanel.Dock = DockStyle.Fill;
             expanderContentPanel.Visible = false;
@@ -546,7 +541,6 @@ namespace OOP_Lab02
             expanderPanel.BorderStyle = BorderStyle.FixedSingle;
             expanderPanel.Dock = DockStyle.Top;
             expanderPanel.Height = expanderToggleButton.PreferredSize.Height + 10;
-            expanderPanel.Tag = label;
 
             expanderPanel.Controls.Add(expanderContentPanel);
             expanderPanel.Controls.Add(expanderToggleButton);
@@ -554,40 +548,22 @@ namespace OOP_Lab02
             return expanderPanel;
         }
 
-        private void ToggleButton_Click(object sender, EventArgs e)
-        {
-            if (isExpanded)
-            {
-                expanderContentPanel.Visible = false;
-                expanderPanel.Height = expanderToggleButton.PreferredSize.Height + 2;
-                expanderToggleButton.Text = $"Развернуть {expanderPanel.Tag as string}";
-                isExpanded = false;
-            }
-            else
-            {
-                expanderContentPanel.Visible = true;
-                expanderPanel.Height = expanderToggleButton.Height + expanderContentPanel.PreferredSize.Height;
-                expanderToggleButton.Text = $"Свернуть {expanderPanel.Tag as string}";
-                isExpanded = true;
-            }
-        }
-
         #endregion
 
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.saveToJsonButon = new System.Windows.Forms.Button();
+            this.loadFromJsonButton = new System.Windows.Forms.Button();
+            this.jsonPathtextBox = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -630,6 +606,9 @@ namespace OOP_Lab02
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.jsonPathtextBox);
+            this.tabPage3.Controls.Add(this.loadFromJsonButton);
+            this.tabPage3.Controls.Add(this.saveToJsonButon);
             this.tabPage3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
             this.tabPage3.Location = new System.Drawing.Point(4, 33);
             this.tabPage3.Name = "tabPage3";
@@ -637,6 +616,35 @@ namespace OOP_Lab02
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Импорт/Экспорт";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // saveToJsonButon
+            // 
+            this.saveToJsonButon.Location = new System.Drawing.Point(277, 306);
+            this.saveToJsonButon.Name = "saveToJsonButon";
+            this.saveToJsonButon.Size = new System.Drawing.Size(220, 28);
+            this.saveToJsonButon.TabIndex = 0;
+            this.saveToJsonButon.Text = "Сохранить в json";
+            this.saveToJsonButon.UseVisualStyleBackColor = true;
+            this.saveToJsonButon.Click += new System.EventHandler(this.saveToJsonButon_Click);
+            // 
+            // loadFromJsonButton
+            // 
+            this.loadFromJsonButton.Location = new System.Drawing.Point(277, 365);
+            this.loadFromJsonButton.Name = "loadFromJsonButton";
+            this.loadFromJsonButton.Size = new System.Drawing.Size(220, 28);
+            this.loadFromJsonButton.TabIndex = 1;
+            this.loadFromJsonButton.Text = "Загрузить из json";
+            this.loadFromJsonButton.UseVisualStyleBackColor = true;
+            this.loadFromJsonButton.Click += new System.EventHandler(this.loadFromJsonButton_Click);
+            // 
+            // jsonPathtextBox
+            // 
+            this.jsonPathtextBox.Location = new System.Drawing.Point(8, 163);
+            this.jsonPathtextBox.Multiline = true;
+            this.jsonPathtextBox.Name = "jsonPathtextBox";
+            this.jsonPathtextBox.Size = new System.Drawing.Size(760, 108);
+            this.jsonPathtextBox.TabIndex = 2;
+            this.jsonPathtextBox.TextChanged += new System.EventHandler(this.jsonPathtextBox_TextChanged);
             // 
             // Form1
             // 
@@ -650,6 +658,8 @@ namespace OOP_Lab02
             this.Name = "Form1";
             this.Text = "Редактор курса по программирования";
             this.tabControl1.ResumeLayout(false);
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -660,6 +670,9 @@ namespace OOP_Lab02
         private TabPage tabPage1;
         private TabPage tabPage2;
         private TabPage tabPage3;
+        private Button saveToJsonButon;
+        private Button loadFromJsonButton;
+        private TextBox jsonPathtextBox;
     }
 }
 
