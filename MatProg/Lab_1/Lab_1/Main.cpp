@@ -21,8 +21,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	double  av1 = 0, av2 = 0;
 	clock_t  t1 = 0, t2 = 0;
 
-	setlocale(LC_ALL, "rus");
-
 	auxil::start();                          // старт генерации 
 
 	for (size_t i = 0; i < 10; i++)
