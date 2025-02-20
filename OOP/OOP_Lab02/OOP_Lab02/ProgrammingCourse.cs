@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace OOP_Lab02
 
         public FinalsType ControlType { get; set; }
 
-        public Teacher Teacher { get; set; }
+        public ObservableCollection<Teacher> Teachers { get; set; }
     }
 
     public enum CourseComplexity
