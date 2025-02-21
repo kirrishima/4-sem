@@ -2,8 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Drawing;
-using System.IO;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -20,44 +18,6 @@ namespace OOP_Lab02
                 components.Dispose();
             }
             base.Dispose(disposing);
-        }
-
-        private void LoadCoursesFromJson(string path)
-        {
-            if (File.Exists(path))
-            {
-                try
-                {
-                    var jsonString = File.ReadAllText(path);
-                    var json = JsonSerializer.Deserialize<ObservableCollection<ProgrammingCourse>>(jsonString);
-
-                    foreach (var item in json)
-                    {
-                        newCourses.Add(item);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ShowErrorDialog($"Ошибка при загрузке данных из '{path}': {ex.Message}");
-                }
-            }
-        }
-
-        private void SaveCoursesToJson(string path)
-        {
-            try
-            {
-                string jsonString = JsonSerializer.Serialize(newCourses);
-
-                using (var sw = new StreamWriter(path))
-                {
-                    sw.Write(jsonString);
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowErrorDialog($"Ошибка при сохранение данных в '{path}': {ex.Message}");
-            }
         }
 
         #region курсы
@@ -211,6 +171,16 @@ namespace OOP_Lab02
                     newCourses.Remove(course);
                 }
                 if (coursesExpanderContentPanel.Controls.Contains(groupBox))
+                {
+                    coursesExpanderContentPanel.Controls.Remove(groupBox);
+                }
+            };
+
+            newCourses.CollectionChanged += (object sender, NotifyCollectionChangedEventArgs e) =>
+            {
+                if (e.Action == NotifyCollectionChangedAction.Remove
+                    && e.OldItems?.Count == 1 && e.OldItems[0].Equals(course)
+                    && coursesExpanderContentPanel.Controls.Contains(groupBox))
                 {
                     coursesExpanderContentPanel.Controls.Remove(groupBox);
                 }
@@ -464,7 +434,8 @@ namespace OOP_Lab02
                 Dock = DockStyle.Top,
                 AutoSize = true,
                 AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                Margin = new Padding(0)
+                Margin = new Padding(0),
+                Text = "Информация о преподавателе"
             };
 
             gb.Controls.Add(tableLayoutPanel);
@@ -559,11 +530,15 @@ namespace OOP_Lab02
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.saveToJsonButon = new System.Windows.Forms.Button();
-            this.loadFromJsonButton = new System.Windows.Forms.Button();
             this.jsonPathtextBox = new System.Windows.Forms.TextBox();
+            this.loadFromJsonButton = new System.Windows.Forms.Button();
+            this.saveToJsonButon = new System.Windows.Forms.Button();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.button1 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
+            this.tabPage4.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -571,6 +546,7 @@ namespace OOP_Lab02
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Top;
             this.tabControl1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F);
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
@@ -617,15 +593,14 @@ namespace OOP_Lab02
             this.tabPage3.Text = "Импорт/Экспорт";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // saveToJsonButon
+            // jsonPathtextBox
             // 
-            this.saveToJsonButon.Location = new System.Drawing.Point(277, 306);
-            this.saveToJsonButon.Name = "saveToJsonButon";
-            this.saveToJsonButon.Size = new System.Drawing.Size(220, 28);
-            this.saveToJsonButon.TabIndex = 0;
-            this.saveToJsonButon.Text = "Сохранить в json";
-            this.saveToJsonButon.UseVisualStyleBackColor = true;
-            this.saveToJsonButon.Click += new System.EventHandler(this.saveToJsonButon_Click);
+            this.jsonPathtextBox.Location = new System.Drawing.Point(8, 163);
+            this.jsonPathtextBox.Multiline = true;
+            this.jsonPathtextBox.Name = "jsonPathtextBox";
+            this.jsonPathtextBox.Size = new System.Drawing.Size(760, 108);
+            this.jsonPathtextBox.TabIndex = 2;
+            this.jsonPathtextBox.TextChanged += new System.EventHandler(this.jsonPathtextBox_TextChanged);
             // 
             // loadFromJsonButton
             // 
@@ -637,14 +612,46 @@ namespace OOP_Lab02
             this.loadFromJsonButton.UseVisualStyleBackColor = true;
             this.loadFromJsonButton.Click += new System.EventHandler(this.loadFromJsonButton_Click);
             // 
-            // jsonPathtextBox
+            // saveToJsonButon
             // 
-            this.jsonPathtextBox.Location = new System.Drawing.Point(8, 163);
-            this.jsonPathtextBox.Multiline = true;
-            this.jsonPathtextBox.Name = "jsonPathtextBox";
-            this.jsonPathtextBox.Size = new System.Drawing.Size(760, 108);
-            this.jsonPathtextBox.TabIndex = 2;
-            this.jsonPathtextBox.TextChanged += new System.EventHandler(this.jsonPathtextBox_TextChanged);
+            this.saveToJsonButon.Location = new System.Drawing.Point(277, 306);
+            this.saveToJsonButon.Name = "saveToJsonButon";
+            this.saveToJsonButon.Size = new System.Drawing.Size(220, 28);
+            this.saveToJsonButon.TabIndex = 0;
+            this.saveToJsonButon.Text = "Сохранить в json";
+            this.saveToJsonButon.UseVisualStyleBackColor = true;
+            this.saveToJsonButon.Click += new System.EventHandler(this.saveToJsonButon_Click);
+            // 
+            // tabPage4
+            // 
+            this.tabPage4.Controls.Add(this.panel1);
+            this.tabPage4.Controls.Add(this.button1);
+            this.tabPage4.Location = new System.Drawing.Point(4, 33);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Size = new System.Drawing.Size(776, 643);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "Расчет прибыли";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // panel1
+            // 
+            this.panel1.AutoScroll = true;
+            this.panel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.panel1.Location = new System.Drawing.Point(33, 93);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(735, 547);
+            this.panel1.TabIndex = 1;
+            // 
+            // button1
+            // 
+            this.button1.AutoSize = true;
+            this.button1.Location = new System.Drawing.Point(228, 16);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(286, 34);
+            this.button1.TabIndex = 0;
+            this.button1.Text = "Расчитать ожидаемый доход";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form1
             // 
@@ -660,6 +667,8 @@ namespace OOP_Lab02
             this.tabControl1.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
+            this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -673,6 +682,9 @@ namespace OOP_Lab02
         private Button saveToJsonButon;
         private Button loadFromJsonButton;
         private TextBox jsonPathtextBox;
+        private TabPage tabPage4;
+        private Button button1;
+        private Panel panel1;
     }
 }
 
