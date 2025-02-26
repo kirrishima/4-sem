@@ -33,7 +33,7 @@ int main()
 		<< std::endl;
 	std::cout << std::string(65, '-') << std::endl;
 
-	for (int i = 25; i <= NN; i++)
+	for (int i = 25; i <= 35; i++)
 	{
 		t1 = clock();
 		maxcc = boat(V, MM, i, v, c, r);
