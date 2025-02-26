@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.HttpLogging;
 
-internal class Program // определяет внутренний класс program
+internal class Program
 {
-    private static void Main(string[] args) // точка входа в приложение
+    private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args); // создает билдер веб-приложения
 
