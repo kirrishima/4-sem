@@ -1,0 +1,88 @@
+﻿@page
+@model CreateModel
+@{
+    ViewData["Title"] = "New Celebrity";
+    int h = 200;
+    bool Confirm = ViewData["Confirm"] is bool b && b;
+    DAL_Celebrity_MSSQL.Celebrity celebrity = Model.Celebrity ?? new();
+}
+
+<h2 class="mb-4">New Celebrity</h2>
+
+<div class="row">
+    <div class="col-md-4 text-center">
+        @if (!Confirm)
+        {
+            <img id="previewImg" src="@Model.PhotosRequestPath/diamond.png" width="@h"  />
+        }
+        else
+        {
+            <img id="0" src="@Model.PhotosRequestPath/@celebrity.ReqPhotoPath" width="@h" />
+        }
+    </div>
+    <div class="col-md-8">
+        @if (!Confirm)
+        {
+            <form method="post" id="createForm" enctype="multipart/form-data" class="card p-4 shadow-sm">
+                <div class="mb-3">
+                    <label for="fullname" class="form-label">Full Name</label>
+                    <input id="fullname" name="fullname" type="text" class="form-control" placeholder="Enter full name" required />
+                </div>
+                <div class="mb-3">
+                    <label for="nationality" class="form-label">Nationality</label>
+                    <input id="nationality" name="nationality" type="text" class="form-control" placeholder="2-letter code" minlength="2" maxlength="2" required />
+                </div>
+                <div class="mb-3">
+                    <label for="upload" class="form-label">Photo (JPEG)</label>
+                    <input id="upload" name="upload" type="file" class="form-control" accept="image/jpeg" required onchange="onChange(this)" />
+                </div>
+                <div class="d-flex  justify-content-start gap-2">
+                    <button type="reset" class="btn btn-outline-secondary">Reset</button>
+                    <button type="submit" class="btn btn-primary">Upload &amp; Preview</button>
+                </div>
+            </form>
+        }
+        else
+        {
+            <form method="post" class="card p-4 shadow-sm">
+                <div class="mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input name="fullname" type="text" class="form-control-plaintext" readonly value="@celebrity.FullName" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Nationality</label>
+                    <input name="nationality" type="text" class="form-control-plaintext" readonly value="@celebrity.Nationality" />
+                </div>
+                <input name="filename" type="hidden" value="@celebrity.ReqPhotoPath" />
+                <div class="d-flex  justify-content-start gap-2">
+                    <button name="press" type="submit" value="Confirm" class="btn btn-success">Confirm</button>
+                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                </div>
+            </form>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function onChange(input) {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            const img = document.getElementById('previewImg');
+            img.src = URL.createObjectURL(file);
+                              
+        }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                   const form = document.getElementById('createForm');
+                   const img  = document.getElementById('previewImg');
+                         
+                   const initialSrc = img?.src;
+
+                   form?.addEventListener('reset', () => {
+                               
+                       img.src = initialSrc;
+                   });
+               });
+    </script>
+}

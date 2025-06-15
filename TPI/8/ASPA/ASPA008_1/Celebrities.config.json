@@ -1,0 +1,8 @@
+{
+  "Celebrities": {
+    "PhotosRequestPath": "/api/Photo",
+    "PhotosFolder": "Photos",
+    "ConnectionString": "Server=localhost;Database=ASPA06;Trusted_Connection=True;TrustServerCertificate=True;",
+    "ISO3166alpha2Path": "CountryCodes/iso3166-1-alpha2-country-codes.json"
+  }
+}

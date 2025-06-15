@@ -1,0 +1,7 @@
+{
+  "Celebrities": {
+    "PhotosRequestPath": "/Photo",
+    "PhotosFolder": "images",
+    "ConnectionString": "Server=localhost;Database=ASPA06;Trusted_Connection=True;TrustServerCertificate=True;"
+  }
+}

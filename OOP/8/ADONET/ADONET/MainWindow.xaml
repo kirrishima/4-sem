@@ -1,0 +1,338 @@
+﻿<Window
+    x:Class="ADONET.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:ADONET.Converters"
+    Title="Управление сетью гостиниц"
+    Background="{DynamicResource WindowBackground}">
+    <Window.Resources>
+        <converters:ByteArrayToImageConverter x:Key="ByteArrayToImageConverter" />
+    </Window.Resources>
+    <Grid>
+        <TabControl>
+            <TabItem Header="Отели">
+                <Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <WrapPanel Margin="0,0,0,5" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Название:" />
+                        <TextBox
+                            x:Name="tbHotelName"
+                            Width="120"
+                            Margin="5,0" />
+                        <TextBlock VerticalAlignment="Center" Text="Адрес:" />
+                        <TextBox
+                            x:Name="tbHotelAddress"
+                            Width="120"
+                            Margin="5,0" />
+                        <TextBlock VerticalAlignment="Center" Text="Телефон:" />
+                        <TextBox
+                            x:Name="tbHotelPhone"
+                            Width="300"
+                            Margin="5,0" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnSelectPhoto_Click"
+                            Content="Выбрать фото" />
+                        <TextBox
+                            x:Name="tbHotelPhotoPath"
+                            Width="200"
+                            Margin="5,0"
+                            IsReadOnly="True" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnAddHotel_Click"
+                            Content="Добавить" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnUpdateHotel_Click"
+                            Content="Обновить" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnDeleteHotel_Click"
+                            Content="Удалить" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnRefreshHotels_Click"
+                            Content="Обновить таблицу" />
+                    </WrapPanel>
+                    <DataGrid
+                        x:Name="dgHotels"
+                        Grid.Row="1"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        IsReadOnly="False"
+                        ItemsSource="{Binding Hotels}"
+                        SelectionChanged="dgHotels_SelectionChanged"
+                        SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Binding="{Binding HotelID}"
+                                Header="ID"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding Name}"
+                                Header="Название"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding Address}"
+                                Header="Адрес"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding Phone}"
+                                Header="Телефон"
+                                IsReadOnly="True" />
+                            <DataGridTemplateColumn Header="Фото" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Image
+                                            MaxHeight="100"
+                                            Source="{Binding Photo, Converter={StaticResource ByteArrayToImageConverter}}"
+                                            Stretch="Uniform" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Номера">
+                <Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <StackPanel Margin="0,0,0,5" Orientation="Horizontal">
+
+                        <TextBlock VerticalAlignment="Center" Text="Отель ID:" />
+                        <TextBox
+                            x:Name="tbRoomHotelID"
+                            Width="50"
+                            Margin="5,0" />
+                        <TextBlock VerticalAlignment="Center" Text="Номер:" />
+                        <TextBox
+                            x:Name="tbRoomNumber"
+                            Width="60"
+                            Margin="5,0" />
+                        <TextBlock VerticalAlignment="Center" Text="Тип:" />
+                        <TextBox
+                            x:Name="tbRoomType"
+                            Width="100"
+                            Margin="5,0" />
+                        <TextBlock VerticalAlignment="Center" Text="Цена:" />
+                        <TextBox
+                            x:Name="tbRoomPrice"
+                            Width="80"
+                            Margin="5,0" />
+
+
+                        <Button
+                            Margin="5,0"
+                            Click="btnAddRoom_Click"
+                            Content="Добавить" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnUpdateRoom_Click"
+                            Content="Обновить" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnDeleteRoom_Click"
+                            Content="Удалить" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnRefreshRooms_Click"
+                            Content="Обновить таблицу" />
+                    </StackPanel>
+
+                    <DataGrid
+                        x:Name="dgRooms"
+                        Grid.Row="1"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        ItemsSource="{Binding Rooms}"
+                        SelectionChanged="dgRooms_SelectionChanged"
+                        SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Binding="{Binding RoomID}"
+                                Header="ID"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding HotelID}"
+                                Header="ID отеля"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding RoomNumber}"
+                                Header="Номер"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding Type}"
+                                Header="Тип"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding Price}"
+                                Header="Цена"
+                                IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Бронирования">
+                <Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <StackPanel Margin="0,0,0,5" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Номер комнаты:" />
+                        <TextBox
+                            x:Name="tbBookingRoomID"
+                            Width="50"
+                            Margin="5,0" />
+                        <TextBlock VerticalAlignment="Center" Text="Клиент ID:" />
+                        <TextBox
+                            x:Name="tbBookingClientID"
+                            Width="50"
+                            Margin="5,0" />
+                        <TextBlock VerticalAlignment="Center" Text="Дата заезда:" />
+                        <TextBox
+                            x:Name="tbBookingStart"
+                            Width="200"
+                            Margin="5,0" />
+                        <TextBlock VerticalAlignment="Center" Text="Дата выезда:" />
+                        <TextBox
+                            x:Name="tbBookingEnd"
+                            Width="200"
+                            Margin="5,0" />
+
+                        <Button
+                            Margin="5,0"
+                            Click="btnAddBooking_Click"
+                            Content="Добавить" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnUpdateBooking_Click"
+                            Content="Обновить" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnDeleteBooking_Click"
+                            Content="Удалить" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnRefreshBookings_Click"
+                            Content="Обновить таблицу" />
+                    </StackPanel>
+
+                    <DataGrid
+                        x:Name="dgBookings"
+                        Grid.Row="1"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        ItemsSource="{Binding Bookings}"
+                        SelectionChanged="dgBookings_SelectionChanged"
+                        SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Binding="{Binding BookingID}"
+                                Header="ID"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding RoomID}"
+                                Header="Номер комнаты"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding ClientID}"
+                                Header="ID клиента"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding StartDate}"
+                                Header="С заезда"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding EndDate}"
+                                Header="По выезда"
+                                IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Клиенты">
+                <Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <WrapPanel Margin="0,0,0,5" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Имя:" />
+                        <TextBox
+                            x:Name="tbClientName"
+                            Width="120"
+                            Margin="5,0" />
+                        <TextBlock VerticalAlignment="Center" Text="Телефон:" />
+                        <TextBox
+                            x:Name="tbClientPhone"
+                            MinWidth="100"
+                            MaxWidth="300"
+                            Margin="5,0" />
+                        <TextBlock VerticalAlignment="Center" Text="Email:" />
+                        <TextBox
+                            x:Name="tbClientEmail"
+                            Width="150"
+                            Margin="5,0" />
+
+                        <Button
+                            Margin="5,0"
+                            Click="btnAddClient_Click"
+                            Content="Добавить" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnUpdateClient_Click"
+                            Content="Обновить" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnDeleteClient_Click"
+                            Content="Удалить" />
+                        <Button
+                            Margin="5,0"
+                            Click="btnRefreshClients_Click"
+                            Content="Обновить таблицу" />
+                    </WrapPanel>
+
+                    <DataGrid
+                        x:Name="dgClients"
+                        Grid.Row="1"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        ItemsSource="{Binding Clients}"
+                        SelectionChanged="dgClients_SelectionChanged"
+                        SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Binding="{Binding ClientID}"
+                                Header="ID"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding Name}"
+                                Header="Имя"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding Phone}"
+                                Header="Телефон"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding Email}"
+                                Header="Email"
+                                IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</Window>

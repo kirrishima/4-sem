@@ -1,0 +1,50 @@
+﻿@page
+@model CelebritiesModel
+@{
+    ViewData["Title"] = "Home page";
+    int imageHeight = 200;
+}
+
+<h2>Celebrities Dictionary Internet Service</h2>
+
+<div class="celeb-grid">
+    <div class="celeb-item">
+        <a asp-page="./Create">
+            <img src="@Model.PhotosRequestPath/diamond.png"
+                 alt="Add New Celebrity"
+                 title="Add New Celebrity"
+                 height="@imageHeight" />
+        </a>
+    </div>
+
+    @foreach (var celeb in Model.AllCelebrities
+    .Where(c => !string.IsNullOrWhiteSpace(c.ReqPhotoPath)))
+    {
+        var imgSrc = $"{Model.PhotosRequestPath.TrimEnd('/')}/{celeb.ReqPhotoPath?.TrimStart('/')}";
+
+        <div class="celeb-item">
+            <a asp-page="/Celebrity" asp-route-id="@celeb.Id">
+                <img src="@imgSrc"
+                     alt="@celeb.FullName"
+                     title="@celeb.FullName"
+                     height="@imageHeight" />
+            </a>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .celeb-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .celeb-item img {
+            object-fit: cover;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+}

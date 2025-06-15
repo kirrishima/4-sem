@@ -1,0 +1,28 @@
+﻿@using DAL_Celebrity_MSSQL;
+@using ASPA008_1.Helpers;
+@model ASPA008_1.Controllers.CelebritiesController.IndexModel
+
+@{
+    Layout = "_CelebritiesLayout";
+}
+@section subhead
+{
+    <h2>Celebrities/Index</h2>
+}
+
+
+
+<div class="d-flex flex-wrap gap-2">
+
+
+    @Html.CelebrityPhoto(0, "New Celebrity", $"{Model.PhotosRequestPath}/{"NewCelebrity.jpg"}")
+
+
+
+    @foreach (Celebrity c in Model.Celebrities)
+    {
+        @Html.CelebrityPhoto(c.Id, c.FullName, $"{Model.PhotosRequestPath}/{c.ReqPhotoPath}")
+        ;
+    }
+
+</div>

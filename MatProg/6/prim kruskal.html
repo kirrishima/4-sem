@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Визуализация Прима и Крускала</title>
+    <!-- Подключаем vis-network для визуализации графа -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      #network {
+        margin-left: 100px;
+        width: 500px;
+        height: 350px;
+        border: 1px solid lightgray;
+        margin-bottom: 20px;
+      }
+      .info {
+        margin-top: 20px;
+        margin-left: 100px;
+      }
+      button {
+        margin-right: 10px;
+      }
+      /* Стили для вершин: по умолчанию белый фон */
+      .visited {
+        background-color: green;
+      }
+      .current {
+        background-color: #90ee90;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Пошаговый обход графа / алгоритмы построения остовного дерева</h1>
+    <p>Матрица смежности (нумерация вершин с 0):</p>
+    <pre>
+0	1	0	1	0	0	0
+0	0	0	0	0	0	0
+0	0	0	0	0	1	0
+0	1	1	0	1	0	1
+0	1	0	0	0	0	1
+0	0	0	0	0	0	1
+0	0	0	0	0	0	0
+    </pre>
+    <p>
+      Выберите алгоритм и нажмите "Старт". После этого используйте кнопку "Шаг", чтобы выполнять обход/построение по
+      одному шагу.
+    </p>
+
+    <div>
+      <!-- Оставлены только алгоритмы Прима и Крускала -->
+      <input type="radio" id="prim" name="algo" value="PRIM" checked />
+      <label for="prim">Прима</label>
+      <input type="radio" id="kruskal" name="algo" value="KRUSKAL" />
+      <label for="kruskal">Крускала</label>
+    </div>
+
+    <button id="startBtn">Старт</button>
+    <button id="stepBtn" disabled>Шаг</button>
+
+    <div class="info">
+      <strong>Текущее:</strong> <span id="currentNode">-</span><br />
+      <strong>Посещённые/В MST:</strong> <span id="visitedNodes">-</span><br />
+      <strong>Содержимое структуры (<span id="structureType">Структура</span>):</strong>
+      <span id="structureContent">-</span>
+    </div>
+
+    <div id="network"></div>
+
+    <script>
+      // Матрица смежности (индексы от 0 до 6)
+      const adjMatrix = [
+        [0, 1, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0],
+        [0, 1, 1, 0, 1, 0, 1],
+        [0, 1, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0],
+      ];
+      const n = adjMatrix.length;
+
+      // Фиксированные координаты для узлов
+      const fixedPositions = {
+        0: { x: 120, y: 30 },
+        1: { x: 240, y: 30 },
+        2: { x: 90, y: 90 },
+        3: { x: 180, y: 90 },
+        4: { x: 270, y: 90 },
+        5: { x: 150, y: 150 },
+        6: { x: 240, y: 150 },
+      };
+
+      // Словарь весов
+      const weightMap = {
+        "0-1": 8,
+        "1-0": 5,
+        "0-2": 1,
+        "2-0": 3,
+        "0-3": 2,
+        "3-0": 8,
+        "1-3": 11,
+        "3-1": 4,
+        "1-4": 5,
+        "4-1": 3,
+        "2-3": 7,
+        "3-2": 9,
+        "2-5": 11,
+        "5-2": 10,
+        "4-3": 4,
+        "3-4": 1,
+        "4-6": 10,
+        "6-4": 2,
+        "5-6": 2,
+        "6-5": 6,
+        "5-3": 3,
+        "3-5": 6,
+        "6-3": 7,
+        "3-6": 9,
+      };
+
+      // Создаем граф для vis-network
+      const nodes = [];
+      const edges = [];
+      for (let i = 0; i < n; i++) {
+        nodes.push({
+          id: i,
+          label: i.toString(),
+          color: { background: "white" },
+          x: fixedPositions[i].x,
+          y: fixedPositions[i].y,
+          fixed: { x: true, y: true },
+        });
+        for (let j = 0; j < n; j++) {
+          if (adjMatrix[i][j] === 1) {
+            const edgeId = i + "-" + j;
+            const label = weightMap[edgeId] !== undefined ? weightMap[edgeId].toString() : "";
+            edges.push({
+              id: edgeId,
+              from: i,
+              to: j,
+              label: label,
+              // Отключаем стрелки, оставляем обычную линию
+              arrows: { to: { enabled: false } },
+              color: { color: "black" },
+            });
+          }
+        }
+      }
+
+      // Инициализация сети vis
+      const container = document.getElementById("network");
+      const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+      const options = { physics: false };
+      const network = new vis.Network(container, data, options);
+
+      // Глобальные переменные для алгоритмов
+      let algo = null;
+      let structure = []; // Для Прима: список кандидатских ребер; для Крускала: отсортированный список ребер
+      let visited = new Set(); // Посещённые (соединённые) вершины
+      let current = null;
+      let structureType = ""; // "Куча" или "Отсортированный список"
+
+      // Дополнительные переменные для Крускала
+      let kruskalUF = []; // Структура union-find
+      let mstEdges = []; // Рёбра, включённые в MST
+      let kruskalEdges = []; // Список уникальных неориентированных ребер (отсортированный)
+
+      // Элементы для вывода информации
+      const currentNodeElem = document.getElementById("currentNode");
+      const visitedNodesElem = document.getElementById("visitedNodes");
+      const structureContentElem = document.getElementById("structureContent");
+      const structureTypeElem = document.getElementById("structureType");
+      const startBtn = document.getElementById("startBtn");
+      const stepBtn = document.getElementById("stepBtn");
+
+      // Функция обновления отображения
+      function updateDisplay() {
+        if (algo === "KRUSKAL") {
+          let currentStr = "-";
+          if (current) {
+            currentStr = current.rejected
+              ? "Отклонено: " + current.from + "-" + current.to + " (" + current.weight + ")"
+              : "Принято: " + current.from + "-" + current.to + " (" + current.weight + ")";
+          }
+          currentNodeElem.textContent = currentStr;
+          // Для Крускала выводим вершины, входящие в MST
+          let mstVertices = new Set();
+          mstEdges.forEach((edge) => {
+            mstVertices.add(edge.from);
+            mstVertices.add(edge.to);
+          });
+          visitedNodesElem.textContent = Array.from(mstVertices).join(", ") || "-";
+          structureContentElem.textContent =
+            structure.map((edge) => edge.from + "-" + edge.to + " (" + edge.weight + ")").join(", ") || "-";
+          structureTypeElem.textContent = structureType;
+        } else {
+          // Для Прима: вывод текущего состояния
+          currentNodeElem.textContent = current !== null ? current : "-";
+          visitedNodesElem.textContent = Array.from(visited).join(", ") || "-";
+          structureContentElem.textContent =
+            structure.map((edge) => edge.from + "-" + edge.to + " (" + edge.weight + ")").join(", ") || "-";
+          structureTypeElem.textContent = structureType;
+        }
+        // Обновляем фон вершин: текущая вершина и посещённые
+        data.nodes.forEach(function (node) {
+          if (node.id === current) {
+            data.nodes.update({ id: node.id, color: { background: "#90ee90" } });
+          } else if (visited.has(node.id)) {
+            data.nodes.update({ id: node.id, color: { background: "green" } });
+          } else {
+            data.nodes.update({ id: node.id, color: { background: "white" } });
+          }
+        });
+      }
+
+      // Функция старта алгоритма
+      function startTraversal() {
+        algo = document.querySelector('input[name="algo"]:checked').value;
+        current = null;
+        stepBtn.disabled = false;
+        // Сбрасываем цвет рёбер: для обоих алгоритмов линии делаем полупрозрачными
+        data.edges.forEach(function (edge) {
+          data.edges.update({
+            id: edge.id,
+            color: { color: "rgba(0,0,0,0.3)" },
+            arrows: { to: { enabled: false } },
+          });
+        });
+        // Сброс посещённых вершин
+        visited = new Set();
+
+        if (algo === "PRIM") {
+          structure = [];
+          visited.add(0);
+          current = 0;
+          structureType = "Куча";
+          // Добавляем кандидатские ребра из 0
+          for (let j = 0; j < n; j++) {
+            if (adjMatrix[0][j] === 1 && !visited.has(j)) {
+              let weight = weightMap["0-" + j];
+              if (weight !== undefined) {
+                structure.push({ from: 0, to: j, weight: weight });
+              }
+            }
+            if (adjMatrix[j][0] === 1 && !visited.has(j)) {
+              let weight = weightMap[j + "-0"];
+              if (weight !== undefined) {
+                structure.push({ from: j, to: 0, weight: weight });
+              }
+            }
+          }
+        } else if (algo === "KRUSKAL") {
+          // Инициализация union-find
+          kruskalUF = [];
+          for (let i = 0; i < n; i++) {
+            kruskalUF[i] = i;
+          }
+          mstEdges = [];
+          kruskalEdges = [];
+          // Формируем список уникальных неориентированных ребер
+          for (let i = 0; i < n; i++) {
+            for (let j = i + 1; j < n; j++) {
+              if (adjMatrix[i][j] === 1 || adjMatrix[j][i] === 1) {
+                let w1 = adjMatrix[i][j] === 1 ? weightMap[i + "-" + j] : undefined;
+                let w2 = adjMatrix[j][i] === 1 ? weightMap[j + "-" + i] : undefined;
+                let weight = w1 !== undefined && w2 !== undefined ? Math.min(w1, w2) : w1 !== undefined ? w1 : w2;
+                kruskalEdges.push({ from: i, to: j, weight: weight });
+              }
+            }
+          }
+          // Сортируем ребра по весу
+          kruskalEdges.sort((a, b) => a.weight - b.weight);
+          structure = kruskalEdges.slice();
+          structureType = "Отсортированный список";
+          // Для Крускала задаем невыбранным рёбрам полупрозрачный стиль
+          data.edges.forEach(function (edge) {
+            data.edges.update({
+              id: edge.id,
+              color: { color: "rgba(0,0,0,0.3)" },
+              arrows: { to: { enabled: false } },
+            });
+          });
+        }
+        updateDisplay();
+      }
+
+      // Функция шага алгоритма Прима
+      function stepPrimTraversal() {
+        if (visited.size === n) {
+          alert("Алгоритм завершён! Все вершины входят в остовное дерево.");
+          stepBtn.disabled = true;
+          return;
+        }
+        if (structure.length === 0) {
+          alert("Нет доступных ребер, алгоритм завершён!");
+          stepBtn.disabled = true;
+          return;
+        }
+        let minIndex = 0;
+        for (let i = 1; i < structure.length; i++) {
+          if (structure[i].weight < structure[minIndex].weight) {
+            minIndex = i;
+          }
+        }
+        const edge = structure.splice(minIndex, 1)[0];
+        let newVertex = null;
+        if (visited.has(edge.from) && !visited.has(edge.to)) {
+          newVertex = edge.to;
+        } else if (visited.has(edge.to) && !visited.has(edge.from)) {
+          newVertex = edge.from;
+        } else {
+          stepPrimTraversal();
+          return;
+        }
+        const edgeId = edge.from + "-" + edge.to;
+        data.edges.update({
+          id: edgeId,
+          color: { color: "red" },
+          arrows: { to: { enabled: false } },
+        });
+        visited.add(newVertex);
+        current = newVertex;
+        for (let j = 0; j < n; j++) {
+          if (adjMatrix[newVertex][j] === 1 && !visited.has(j)) {
+            const weight = weightMap[newVertex + "-" + j];
+            if (weight !== undefined) {
+              structure.push({ from: newVertex, to: j, weight: weight });
+            }
+          }
+          if (adjMatrix[j][newVertex] === 1 && !visited.has(j)) {
+            const weight = weightMap[j + "-" + newVertex];
+            if (weight !== undefined) {
+              structure.push({ from: j, to: newVertex, weight: weight });
+            }
+          }
+        }
+        updateDisplay();
+      }
+
+      // Функция шага алгоритма Крускала
+      function stepKruskalTraversal() {
+        if (mstEdges.length === n - 1) {
+          alert("Алгоритм завершён! Остовное дерево построено.");
+          stepBtn.disabled = true;
+          return;
+        }
+        if (structure.length === 0) {
+          alert("Нет оставшихся ребер, алгоритм завершён!");
+          stepBtn.disabled = true;
+          return;
+        }
+        const edge = structure.shift();
+        const u = edge.from,
+          v = edge.to;
+        if (find(u) !== find(v)) {
+          union(u, v);
+          mstEdges.push(edge);
+          // Для окраски вершин добавляем их в visited
+          visited.add(u);
+          visited.add(v);
+          current = edge; // Здесь current не используется для сравнения с id узла
+          let edgeId = u + "-" + v;
+          if (!data.edges.get(edgeId)) {
+            edgeId = v + "-" + u;
+          }
+          data.edges.update({
+            id: edgeId,
+            color: { color: "red" },
+            arrows: { to: { enabled: false } },
+          });
+        } else {
+          current = { from: u, to: v, weight: edge.weight, rejected: true };
+        }
+        updateDisplay();
+      }
+
+      // Функция шага, выбирающая алгоритм по выбору пользователя
+      function stepTraversal() {
+        if (algo === "PRIM") {
+          stepPrimTraversal();
+        } else if (algo === "KRUSKAL") {
+          stepKruskalTraversal();
+        }
+      }
+
+      function find(x) {
+        if (kruskalUF[x] !== x) {
+          kruskalUF[x] = find(kruskalUF[x]);
+        }
+        return kruskalUF[x];
+      }
+      function union(x, y) {
+        let rootX = find(x);
+        let rootY = find(y);
+        if (rootX !== rootY) {
+          kruskalUF[rootY] = rootX;
+        }
+      }
+
+      startBtn.addEventListener("click", startTraversal);
+      stepBtn.addEventListener("click", stepTraversal);
+    </script>
+  </body>
+</html>

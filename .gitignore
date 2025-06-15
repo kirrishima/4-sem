@@ -1,0 +1,9 @@
+.vs/
+x64/
+*.rar
+Debug/
+Release/
+~*
+bin/
+obj/
+UI-UX/Лекции/

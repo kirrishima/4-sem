@@ -1,0 +1,5 @@
+npm start #запуск реакт приложения
+
+npx create-react-app название --template typescript
+
+npm install # восстановить модули

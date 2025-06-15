@@ -1,0 +1,6 @@
+{
+  "Celebrities": {
+    "PhotosFolder": "wwwroot",
+    "ConnectionString": "Server=localhost;Database=ASPA06;Trusted_Connection=True;TrustServerCertificate=True;"
+  }
+}

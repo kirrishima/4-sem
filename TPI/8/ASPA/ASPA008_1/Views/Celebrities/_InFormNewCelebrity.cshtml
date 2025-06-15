@@ -1,0 +1,144 @@
+﻿@using ASPA008_1.Models
+@model NewHumanFormModel
+@inject ASPA008_1.Extension.CountryCodes Countries
+
+@{
+    var sl = new SelectList(Countries, "code", "countryLabel", Model.Nationality);
+    string imgSrc = (Model.Mode == FormMode.Create && !Model.Confirm)
+        ? $"{Model.PhotosRequestPath}/NewCelebrity.jpg"
+        : $"{Model.PhotosRequestPath}/{Model.TempFileName}";
+}
+
+<form asp-action="NewHumanForm"
+      asp-controller="Celebrities"
+      method="post"
+      enctype="multipart/form-data"
+      class="card p-4 shadow-sm">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="Mode" />
+    <input type="hidden" name="tempfilename" value="@Model.TempFileName" />
+
+    <div class="row mb-3">
+        <div class="celebrity-box col-md-4 text-center">
+            <img id="previewImg"
+                 src="@imgSrc"
+                 class="img-fluid"
+                 style="max-width:120px; border:2px solid black" />
+        </div>
+        <div class=" col-md-8 mx-auto" style="max-width: 600px;">
+            @if (Model.Mode == FormMode.Delete)
+            {
+                <input name="fullname"
+                       value="@Model.FullName"
+                       readonly
+                       class="form-control mb-3" />
+
+                <input name="nationality"
+                       value="@Model.Nationality"
+                       readonly
+                       class="form-control mb-3" />
+
+                <div class="d-flex justify-content-start gap-2 mb-3">
+                    <button name="press" value="Confirm" type="submit" class="btn btn-danger">Delete</button>
+                    <button name="press" value="Cancel" type="submit" class="btn btn-link">Back</button>
+                </div>
+            }
+            else if (Model.Mode == FormMode.Edit)
+            {
+                <input name="fullname"
+                       value="@Model.FullName"
+                       placeholder="Celebrity Name"
+                       required
+                       class="form-control mb-3" />
+
+                @Html.DropDownList("Nationality", sl, new { @class = "form-select mb-3" })
+
+                <input id="upload"
+                       name="upload"
+                       type="file"
+                       accept="image/jpeg"
+                       style="display:none"
+                       onchange="onChange(this)" />
+
+                <button type="button"
+                        class="btn btn-outline-primary mb-3"
+                        onclick="document.getElementById('upload').click()">
+                    Change Photo
+                </button>
+
+                <div class="d-flex justify-content-start gap-2 mb-3">
+                    <button name="press" value="Confirm" type="submit" class="btn btn-primary">Save</button>
+                    <button name="press" value="Cancel" type="submit" class="btn btn-link">Cancel</button>
+                </div>
+            }
+            else
+            {
+                @if (!Model.Confirm)
+                {
+                    <input name="fullname"
+                           value="@Model.FullName"
+                           placeholder="Celebrity Name"
+                           required
+                           class="form-control mb-3" />
+
+                    @Html.DropDownList("Nationality", sl, new { @class = "form-select mb-3" })
+
+                    <input id="upload"
+                           name="upload"
+                           type="file"
+                           accept="image/jpeg"
+                           style="display:none"
+                           onchange="onChange(this)"
+                           required />
+
+                    <button type="button"
+                            class="btn btn-outline-primary mb-3"
+                            onclick="document.getElementById('upload').click()">
+                        Upload Photo
+                    </button>
+
+                    <div class="d-flex justify-content-start gap-2 mb-3">
+                        <button type="submit" class="btn btn-success">Preview</button>
+                        <button type="reset" class="btn btn-secondary">Cancel</button>
+                    </div>
+                }
+                else
+                {
+                    <input name="fullname"
+                           value="@Model.FullName"
+                           readonly
+                           class="form-control mb-3" />
+
+                    <input name="nationality"
+                           value="@Model.Nationality"
+                           readonly
+                           class="form-control mb-3" />
+
+                    <div class="d-flex justify-content-start gap-2 mb-3">
+                        <button name="press" value="Confirm" type="submit" class="btn btn-primary">Confirm</button>
+                        <button name="press" value="Cancel" type="submit" class="btn btn-link">Edit</button>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</form>
+
+<script>
+    function onChange(input) {
+        const btn = document.querySelector("button.btn-outline-primary");
+        const file = input.files[0];
+        let name = file ? file.name : "Upload Photo";
+        if (name.length > 20) {
+            const ext = name.split('.').pop();
+            name = name.slice(0, 15) + '...' + ext;
+        }
+        btn.textContent = name;
+
+        if (!file) return;
+        const img = document.getElementById('previewImg');
+        img.src = URL.createObjectURL(file);
+    }
+</script>

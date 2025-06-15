@@ -1,0 +1,11 @@
+﻿@page
+@model ASPA007_1.Pages.CelebrityModel
+@{
+    string fullname = Model.Celebrity?.FullName ?? "???";
+    ViewData["Title"] = fullname;
+}
+
+<h1>@fullname</h1>
+
+<p>Nationality: @Model.Celebrity?.Nationality</p>
+<p style="max-width: 100vw"> <img src="@Model.PhotosRequestPath/@Model.Celebrity?.ReqPhotoPath" style="max-width: 100%" /></p>

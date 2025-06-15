@@ -1,0 +1,100 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+
+@hp=http://localhost:5292
+@capi=/api/Celebrities
+@lapi=/api/Lifeevents
+
+
+### все знаменитости
+### cetebrities . MapGet("/")
+GET {{hp}}{{capi}}
+
+
+### знаменитость по ID
+### MapGet("/{id:int:min(1)}")
+GET {{hp}}{{capi}}/7
+
+
+### знаменитость по ID события
+### HapGet(" /Lifeevents/{id:int:min(1)}""
+GET {{hp}}{{capi}}/Lifeevents/7
+
+
+### удалить знаменитость по ID
+### MapDe1ete(” /{id : int : min(1)} ,
+DELETE {{hp}}{{capi}}/4
+
+
+### удалить знаменитость по ID
+### MapDe1ete(” /{id : int : min(1)} ,
+DELETE {{hp}}{{capi}}/4
+
+
+### MapPost("/")
+POST {{hp}}{{capi}}
+Content-Type:application/json
+
+{
+  "fullName":"Ершов Андрей",
+  "nationality":"RU",
+  "reqPhotoPath":"Ershov.jpg"
+}
+
+
+### MapPut("/{id:int:min(1)}")
+PUT {{hp}}{{capi}}/13
+Content-Type:application/json
+
+{
+  "fullName":"Ершов Андрей Петрович",
+  "nationality":"RU",
+  "reqPhotoPath":"Ershov.jpg"
+}
+
+
+### получить файл фотографии по имени файла
+GET {{hp}}{{capi}}/photo/Ershov.jpg
+
+
+
+### ===================================
+
+GET {{hp}}{{lapi}}
+
+
+###
+GET {{hp}}{{lapi}}/10
+
+
+### все события по ID знаменитости
+GET {{hp}}{{lapi}}/Celebrities/3
+
+
+### удалить событие по ID
+DELETE  {{hp}}{{lapi}}/10
+
+
+### удалить событие по ID
+DELETE  {{hp}}{{lapi}}/25
+
+
+### добавить новое событие
+POST {{hp}}{{lapi}}
+Content-Type:application/json
+
+{
+  "celebrityId": 13,
+  "date": "1931-04-19T00:00:00",
+  "description": "Дата рождения",
+  "reqPhotoPath": null
+}
+
+###
+PUT {{hp}}{{lapi}}/24 
+Content-Type:application/json
+{
+  "celebrityId": 13,
+  "date": "1931-04-19T00:00:00",
+  "description": "Дата рождения наоборот",
+  "reqPhotoPath": null
+}

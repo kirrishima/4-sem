@@ -1,0 +1,61 @@
+﻿@using DAL_Celebrity_MSSQL;
+@using System.Globalization;
+@using ASPA008_1.Helpers;
+@model ASPA008_1.Controllers.CelebritiesController.HumanModel
+
+@{
+    Layout = "_CelebritiesLayout";
+    var celebrity = Model.celebrity;
+    var references = Model.references ?? new Dictionary<string, string>();
+    var photoUrl = $"{Model.photosrequestpath}/{celebrity.ReqPhotoPath}";
+}
+
+@section subhead { }
+
+<div class="container my-5">
+    <div class="card shadow-sm">
+        <div class="row g-0">
+            <div class="col-md-4 text-center p-4">
+                <img src="@photoUrl"
+                     alt="@celebrity.FullName"
+                     class="img-fluid"
+                     style="max-width: 200px;" />
+            </div>
+
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h2 class="card-title mb-3">@celebrity.FullName</h2>
+                    <ul class="list-group list-group-flush mb-3">
+                        @foreach (var life in Model.lifeevents)
+                        {
+                            <li class="list-group-item">
+                                <small class="text-muted">
+                                    @life.Date.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)
+                                </small>
+                                <span class="ms-2">@life.Description</span>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="mb-4">
+                        @foreach (var kv in references)
+                        {
+                            <a href="@kv.Value" target="_blank" class="btn btn-outline-primary btn-sm me-2 mb-2">
+                                @kv.Key
+                            </a>
+                        }
+                    </div>
+
+                    <div class="d-flex">
+                        <a asp-action="Edit" asp-route-id="@celebrity.Id" class="btn btn-warning me-2">
+                            <i class="bi bi-pencil-fill"></i> Edit
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@celebrity.Id" class="btn btn-danger">
+                            <i class="bi bi-trash-fill"></i> Delete
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

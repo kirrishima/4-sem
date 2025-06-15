@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Визуализация DFS с тремя цветами</title>
+    <!-- Подключаем vis-network для визуализации графа -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      #network {
+        margin: 20px auto;
+        width: 500px;
+        height: 350px;
+        border: 1px solid lightgray;
+        margin-bottom: 20px;
+      }
+      .controls {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .info {
+        text-align: center;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 style="text-align: center">Визуализация DFS</h1>
+    <div class="controls">
+      <button id="startBtn">Начать обход</button>
+      <button id="stepBtn" disabled>Следующий шаг</button>
+    </div>
+    <div class="info">
+      <strong>Порядок завершения (чёрные вершины):</strong>
+      <span id="dfsOrder">-</span>
+    </div>
+    <div id="network"></div>
+
+    <script>
+      // Матрица смежности (нумерация вершин с 0)
+      const adjMatrix = [
+        [0, 1, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0],
+        [0, 1, 1, 0, 1, 0, 1],
+        [0, 1, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0],
+      ];
+      const n = adjMatrix.length;
+
+      // Фиксированные координаты для узлов
+      const fixedPositions = {
+        0: { x: 120, y: 30 },
+        1: { x: 240, y: 30 },
+        2: { x: 90, y: 90 },
+        3: { x: 180, y: 90 },
+        4: { x: 270, y: 90 },
+        5: { x: 150, y: 150 },
+        6: { x: 240, y: 150 },
+      };
+
+      // Создаем узлы и ребра для vis-network
+      const nodesArray = [];
+      const edgesArray = [];
+      for (let i = 0; i < n; i++) {
+        nodesArray.push({
+          id: i,
+          label: i.toString(),
+          color: { background: "white" }, // изначально все белые
+          x: fixedPositions[i].x,
+          y: fixedPositions[i].y,
+          fixed: { x: true, y: true },
+        });
+        for (let j = 0; j < n; j++) {
+          if (adjMatrix[i][j] === 1) {
+            edgesArray.push({
+              id: i + "-" + j,
+              from: i,
+              to: j,
+              arrows: { to: { enabled: true } },
+              color: { color: "black" },
+            });
+          }
+        }
+      }
+
+      // Инициализация vis-network
+      const container = document.getElementById("network");
+      const data = {
+        nodes: new vis.DataSet(nodesArray),
+        edges: new vis.DataSet(edgesArray),
+      };
+      const options = { physics: false };
+      const network = new vis.Network(container, data, options);
+
+      // Глобальные переменные для DFS-симуляции
+      let simulationStack = []; // элементы: { v, nextIndex }
+      let dfsOrder = []; // список вершин, когда они переходят в черный цвет
+
+      // Функция обновления вывода итогового порядка
+      function updateDfsOrder() {
+        document.getElementById("dfsOrder").textContent = dfsOrder.join(" ");
+      }
+
+      // Функция для установки цвета вершины
+      function setNodeColor(id, color) {
+        data.nodes.update({ id: id, color: { background: color } });
+      }
+
+      // Возвращает цвет вершины (определяем по data.nodes)
+      function getNodeColor(id) {
+        return data.nodes.get(id).color.background;
+      }
+
+      // Функция поиска следующей белой (необнаруженной) вершины, если стек пуст
+      function pushNextUnvisited() {
+        for (let i = 0; i < n; i++) {
+          if (getNodeColor(i) === "white") {
+            simulationStack.push({ v: i, nextIndex: 0 });
+            setNodeColor(i, "gray"); // обнаружили -> серый
+            return true;
+          }
+        }
+        return false;
+      }
+
+      // Функция, выполняющая один шаг DFS
+      function nextStep() {
+        // Если стек пуст, попробуем начать с новой компоненты
+        if (simulationStack.length === 0) {
+          if (!pushNextUnvisited()) {
+            alert("Обход завершен!");
+            document.getElementById("stepBtn").disabled = true;
+            return;
+          }
+        }
+
+        // Берем элемент из вершины стека
+        let top = simulationStack[simulationStack.length - 1];
+        let v = top.v;
+        let found = false;
+        // Ищем следующего соседа, начиная с top.nextIndex
+        for (let j = top.nextIndex; j < n; j++) {
+          top.nextIndex = j + 1; // обновляем индекс для следующей итерации
+          if (adjMatrix[v][j] === 1 && getNodeColor(j) === "white") {
+            // Обнаружили белую вершину, добавляем в стек и красим в серый
+            simulationStack.push({ v: j, nextIndex: 0 });
+            setNodeColor(j, "gray");
+            found = true;
+            break;
+          }
+        }
+        // Если соседей не найдено, завершаем обработку вершины v
+        if (!found) {
+          simulationStack.pop();
+          setNodeColor(v, "black");
+          dfsOrder.push(v);
+          updateDfsOrder();
+        }
+      }
+
+      // Обработчики кнопок
+      document.getElementById("startBtn").addEventListener("click", () => {
+        // Сбросим состояние
+        simulationStack = [];
+        dfsOrder = [];
+        updateDfsOrder();
+        // Восстанавливаем цвета вершин
+        data.nodes.forEach(function (node) {
+          data.nodes.update({ id: node.id, color: { background: "white" } });
+        });
+        // Восстанавливаем ребра
+        data.edges.clear();
+        for (let i = 0; i < n; i++) {
+          for (let j = 0; j < n; j++) {
+            if (adjMatrix[i][j] === 1) {
+              data.edges.add({
+                id: i + "-" + j,
+                from: i,
+                to: j,
+                arrows: { to: { enabled: true } },
+                color: { color: "black" },
+              });
+            }
+          }
+        }
+        // Начинаем с первой белой вершины (если граф не пустой)
+        pushNextUnvisited();
+        document.getElementById("stepBtn").disabled = false;
+      });
+
+      document.getElementById("stepBtn").addEventListener("click", nextStep);
+    </script>
+  </body>
+</html>
+  

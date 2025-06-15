@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Визуализация BFS и DFS</title>
+    <!-- Подключаем vis-network для визуализации графа -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      #network {
+        margin-left: 100px;
+        width: 400px;
+        height: 300px;
+        border: 1px solid lightgray;
+        margin-bottom: 20px;
+      }
+      .info {
+        margin-top: 50px;
+        margin-left: 100px;
+      }
+      button {
+        margin-right: 10px;
+      }
+      .visited {
+        color: gray;
+      }
+      .current {
+        color: green;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Пошаговый обход графа</h1>
+    <p>Матрица смежности (нумерация вершин с 0):</p>
+    <pre>
+0	1	0	1	0	0	0
+0	0	0	0	0	0	0
+0	0	0	0	0	1	0
+0	1	1	0	1	0	1
+0	1	0	0	0	0	1
+0	0	0	0	0	0	1
+0	0	0	0	0	0	0
+    </pre>
+    <p>
+      Выберите алгоритм и нажмите "Старт". После этого используйте кнопку "Шаг", чтобы выполнять обход по одному шагу.
+    </p>
+
+    <div>
+      <input type="radio" id="bfs" name="algo" value="BFS" checked />
+      <label for="bfs">BFS (очередь)</label>
+      <input type="radio" id="dfs" name="algo" value="DFS" />
+      <label for="dfs">DFS (стек)</label>
+    </div>
+
+    <button id="startBtn">Старт</button>
+    <button id="stepBtn" disabled>Шаг</button>
+
+    <div class="info">
+      <strong>Текущая вершина:</strong> <span id="currentNode">-</span><br />
+      <strong>Посещённые вершины:</strong> <span id="visitedNodes">-</span><br />
+      <strong>Содержимое структуры (<span id="structureType">Очередь</span>):</strong>
+      <span id="structureContent">-</span>
+    </div>
+
+    <div id="network"></div>
+
+    <script>
+      // Матрица смежности (индексы от 0 до 6)
+      const adjMatrix = [
+        [0, 1, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0],
+        [0, 1, 1, 0, 1, 0, 1],
+        [0, 1, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0],
+      ];
+
+      // Фиксированные координаты для вершин
+      const fixedPositions = {
+        0: { x: 75, y: 13 },
+        1: { x: 175, y: 13 },
+        2: { x: 50, y: 50 },
+        3: { x: 125, y: 50 },
+        4: { x: 200, y: 50 },
+        5: { x: 100, y: 88 },
+        6: { x: 175, y: 88 },
+      };
+
+      // Создаем граф для vis-network
+      const nodes = [];
+      const edges = [];
+      const n = adjMatrix.length;
+      for (let i = 0; i < n; i++) {
+        nodes.push({
+          id: i,
+          label: i.toString(),
+          color: { background: "white" },
+          x: fixedPositions[i].x,
+          y: fixedPositions[i].y,
+          fixed: { x: true, y: true },
+        });
+        for (let j = 0; j < n; j++) {
+          if (adjMatrix[i][j] === 1) {
+            edges.push({ from: i, to: j, arrows: "to" });
+          }
+        }
+      }
+
+      // Инициализация сети vis
+      const container = document.getElementById("network");
+      const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+      const options = { physics: false };
+      const network = new vis.Network(container, data, options);
+
+      // Глобальные переменные обхода
+      let algo = null;
+      let structure = []; // очередь для BFS или стек для DFS
+      let visited = new Set();
+      let current = null;
+      let structureType = "Очередь"; // или "Стек"
+
+      // Элементы для вывода информации
+      const currentNodeElem = document.getElementById("currentNode");
+      const visitedNodesElem = document.getElementById("visitedNodes");
+      const structureContentElem = document.getElementById("structureContent");
+      const structureTypeElem = document.getElementById("structureType");
+      const startBtn = document.getElementById("startBtn");
+      const stepBtn = document.getElementById("stepBtn");
+
+      // Функция обновления отображения
+      function updateDisplay() {
+        currentNodeElem.textContent = current !== null ? current : "-";
+        visitedNodesElem.textContent = Array.from(visited).join(", ") || "-";
+        structureContentElem.textContent = structure.join(", ") || "-";
+        structureTypeElem.textContent = structureType;
+        // Обновление цвета вершин
+        data.nodes.forEach(function (node) {
+          if (node.id === current) {
+            data.nodes.update({ id: node.id, color: { background: "#90ee90" } });
+          } else if (visited.has(node.id)) {
+            data.nodes.update({ id: node.id, color: { background: "#d3d3d3" } });
+          } else {
+            data.nodes.update({ id: node.id, color: { background: "white" } });
+          }
+        });
+      }
+
+      // Функция старта обхода
+      function startTraversal() {
+        algo = document.querySelector('input[name="algo"]:checked').value;
+        visited = new Set();
+        structure = [];
+        current = null;
+        if (algo === "BFS") {
+          structure.push(0); // стартовая вершина
+          structureType = "Очередь";
+        } else if (algo === "DFS") {
+          structure.push(0); // стартовая вершина
+          structureType = "Стек";
+        }
+        updateDisplay();
+        stepBtn.disabled = false;
+      }
+
+      // Функция шага обхода для BFS
+      function stepBFSTraversal() {
+        if (structure.length === 0) {
+          alert("Обход завершён!");
+          stepBtn.disabled = true;
+          return;
+        }
+        // Извлекаем вершину из начала очереди
+        current = structure.shift();
+        if (visited.has(current)) {
+          updateDisplay();
+          return;
+        }
+        visited.add(current);
+        // Добавляем соседей (в порядке возрастания)
+        for (let j = 0; j < n; j++) {
+          if (adjMatrix[current][j] === 1 && !visited.has(j) && !structure.includes(j)) {
+            structure.push(j);
+          }
+        }
+        updateDisplay();
+      }
+
+      // Функция шага обхода для DFS
+      function stepDFSTraversal() {
+        if (structure.length === 0) {
+          alert("Обход завершён!");
+          stepBtn.disabled = true;
+          return;
+        }
+        // Извлекаем вершину с вершины стека
+        current = structure.pop();
+        if (visited.has(current)) {
+          updateDisplay();
+          return;
+        }
+        visited.add(current);
+        // Для корректного порядка (сначала меньшие) добавляем соседей в обратном порядке
+        for (let j = n - 1; j >= 0; j--) {
+          if (adjMatrix[current][j] === 1 && !visited.has(j) && !structure.includes(j)) {
+            structure.push(j);
+          }
+        }
+        updateDisplay();
+      }
+
+      // Единая функция шага обхода, выбирающая алгоритм
+      function stepTraversal() {
+        if (algo === "BFS") {
+          stepBFSTraversal();
+        } else if (algo === "DFS") {
+          stepDFSTraversal();
+        }
+      }
+
+      startBtn.addEventListener("click", startTraversal);
+      stepBtn.addEventListener("click", stepTraversal);
+    </script>
+  </body>
+</html>

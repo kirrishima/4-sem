@@ -1,0 +1,103 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36" version="25.0.3">
+  <diagram name="Страница — 1" id="08kXbSgeMl7sAfnKWT92">
+    <mxGraphModel dx="2206" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="OTuNXIVwzIxitzf9Tw6A-1" value="Клиент" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+          <mxGeometry x="35" y="555" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-24" value="Просмотреть доступные номера" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="95" y="410" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-26" value="Выбрать подходящий номер" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="170" y="625" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-27" value="Забронировать выбранный номер" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="85" y="750" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-28" value="Просмотреть детальную информацию о номерах" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="205" y="505" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-29" value="&lt;div&gt;Менеджер&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="500" y="580" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-30" value="Проконсультировать пользователя&amp;nbsp;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="710" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-31" value="Отменять, подтверждать бронирования" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="490" y="730" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-33" value="Отменять, подтверждать бронирования" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="650" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-35" value="Администратор" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="610" y="400" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-37" value="Получать статистику бронирований&amp;nbsp;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="520" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-39" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.375;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="RyeBIpr7Ym7om2RBMaHl-37">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="630" y="490" as="sourcePoint" />
+            <mxPoint x="630" y="470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-41" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.569;entryY=0.047;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="RyeBIpr7Ym7om2RBMaHl-30">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="480" y="650" as="sourcePoint" />
+            <mxPoint x="470" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-42" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" target="RyeBIpr7Ym7om2RBMaHl-31">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="530" y="670" as="sourcePoint" />
+            <mxPoint x="418" y="724" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-43" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" target="RyeBIpr7Ym7om2RBMaHl-33">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="550" y="650" as="sourcePoint" />
+            <mxPoint x="428" y="734" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-45" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.958;entryY=0.25;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="RyeBIpr7Ym7om2RBMaHl-27">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="480" y="630" as="sourcePoint" />
+            <mxPoint x="418" y="724" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-46" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.375;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="RyeBIpr7Ym7om2RBMaHl-27">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="60" y="640" as="sourcePoint" />
+            <mxPoint x="428" y="734" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-47" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" target="RyeBIpr7Ym7om2RBMaHl-26">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="620" as="sourcePoint" />
+            <mxPoint x="438" y="744" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-48" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" target="RyeBIpr7Ym7om2RBMaHl-28">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="600" as="sourcePoint" />
+            <mxPoint x="198" y="647" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-49" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.217;entryY=0.888;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="RyeBIpr7Ym7om2RBMaHl-24">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="70" y="570" as="sourcePoint" />
+            <mxPoint x="215" y="555" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RyeBIpr7Ym7om2RBMaHl-50" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" target="RyeBIpr7Ym7om2RBMaHl-26">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="490" y="610" as="sourcePoint" />
+            <mxPoint x="210" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

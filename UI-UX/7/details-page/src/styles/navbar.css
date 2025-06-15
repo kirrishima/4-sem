@@ -1,0 +1,34 @@
+.navbar {
+  width: 100%;
+  color: var(--main-text-color);
+  padding: 7px 32px;
+  display: inline-flex;
+  border-bottom: var(--main-text-color) 2px solid;
+}
+
+div.container.nav {
+  max-width: 1300px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: inline-block;
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: normal;
+}
+
+.nav-list {
+  list-style: none;
+  display: inline-flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.nav-list a {
+  text-decoration: none;
+  font-weight: 500;
+}

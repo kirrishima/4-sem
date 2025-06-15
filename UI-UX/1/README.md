@@ -1,0 +1,1 @@
+[Ссылка на актуальную версию](https://www.figma.com/design/E4Q5w3tZhJwwDcaOlbSUnE/1-%D0%BB%D0%B0%D0%B1%D0%B0?node-id=1-2&t=1olwbGtBlM9L6lEM-1)
